@@ -8,9 +8,7 @@ class PriceResult(BaseModel):
     mpn: str
     price: Decimal
     currency: str
-    in_stock: bool 
-    confident: bool = Field(default_factory=False)
-    scraped_at: datetime = Field(default_factory=datetime.now())
+    scraped_at: datetime = Field(default_factory=datetime.utcnow)
 
 class SearchResult(BaseModel):
     vendor_id: str
