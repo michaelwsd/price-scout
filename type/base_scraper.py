@@ -12,3 +12,6 @@ class BaseScraper(BaseModel, ABC):
     @abstractmethod
     def scrape(self, mpn: str) -> PriceResult:
         """Extract price and metadata"""
+
+    def clean_mpn(self, mpn: str) -> str:
+        return mpn.strip().replace("/", "-")

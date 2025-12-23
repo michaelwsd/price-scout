@@ -12,6 +12,8 @@ class ScorptecScraper(BaseScraper):
     currency: str = "AUD" 
 
     def scrape(self, mpn: str) -> PriceResult:
+        self.clean_mpn(mpn) # replace all / with -
+
         url = f"https://www.scorptec.com.au/search/go?w={mpn}&cnt=1"
         logger.info("Scraping Scorptec for MPN=%s", mpn)
 
