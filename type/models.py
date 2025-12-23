@@ -1,6 +1,6 @@
+import datetime
 from pydantic import BaseModel, HttpUrl, Field 
 from decimal import Decimal
-from datetime import datetime
 
 class PriceResult(BaseModel):
     vendor_id: str 
@@ -8,7 +8,7 @@ class PriceResult(BaseModel):
     mpn: str
     price: Decimal
     currency: str
-    scraped_at: datetime = Field(default_factory=datetime.utcnow)
+    scraped_at: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc))
 
 class SearchResult(BaseModel):
     vendor_id: str

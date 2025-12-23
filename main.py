@@ -42,10 +42,10 @@ async def main():
     logger.info("Starting price scout")
     logger.info("Searching for MPN=%s", mpn)
 
-    scraper = ScorptecScraper()
+    scorptec_scraper = ScorptecScraper()
 
     try:
-        result = await scraper.scrape(mpn)
+        result = scorptec_scraper.scrape(mpn)
 
         if result:
             logger.info("Scrape successful for %s", mpn)

@@ -8,7 +8,7 @@ class BaseScraper(BaseModel, ABC):
 
     class Config:
         arbitrary_types_allowed = True 
-    
+
     @abstractmethod
-    async def scrape(self, url: str, mpn: str) -> PriceResult:
+    def scrape(self, mpn: str) -> PriceResult:
         """Extract price and metadata"""
