@@ -13,9 +13,7 @@ def test_single_scorptec(mpn):
     price_element = soup.select_one("div.product-page-price.product-main-price")
     model_element = soup.select_one("div.product-page-model")
     
-    if model_element and model_element.get_text(strip=True) == mpn:
-        print(f"MPN: {model_element.get_text(strip=True)}")
-    else:
+    if not (model_element and model_element.get_text(strip=True) == mpn):
         print("MPN: Not found")
         return
     
@@ -33,10 +31,7 @@ def test_single_mwave(mpn):
     soup = BeautifulSoup(r.text, 'lxml')
 
     model_element = soup.select_one("span.sku")
-    if model_element:
-        model_number = model_element.get_text(strip=True).split()[-1]
-        print(f"MPN: {model_number}")
-    else:
+    if not (model_element and model_element.get_text(strip=True).split()[-1] == mpn):
         print("MPN: Not found")
         return
     
@@ -79,8 +74,6 @@ async def test_single_pccg(mpn):
         if not model or model.get_text(strip=True) != mpn:
             print("MPN: Not found")
             return 
-
-        print(f"Model: {model.get_text(strip=True)}")
 
         # # get price
         price = product.select_one("div.price")
@@ -127,29 +120,27 @@ async def test_single_jwc(mpn):
         soup = BeautifulSoup(html, 'lxml')
     
         model = soup.select_one("div.value[itemprop='mpn']")
-        if not model:
+        if not model or model.get_text(strip=True) != mpn:
             print("Model: Not found")
             return 
         
-        print(f"Model: {model.get_text(strip=True)}")
-
-        price = soup.select_one("span.price")
+        price = soup.select("span.price")[-1]
         if not price:
             print("Price: Not found")
             return 
         
-        print(f"Price: {float(price.get_text(strip=True)[1:])}")
+        print(f"Price: {float(price.get_text(strip=True).replace(',', '')[1:])}")
         print(f"Link: {link}")
 
         await browser.close()
 
-async def test_single_ca(mpn):
+async def test_single_umart(mpn):
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
 
         await page.goto(
-            f"https://www.computeralliance.com.au/search?search={mpn}",
+            f"https://www.umart.com.au/search.php?cat_id=&keywords={mpn}",
             wait_until="networkidle" # wait for JS requests
             )
 
@@ -190,8 +181,8 @@ async def test_single_ca(mpn):
         await browser.close()
 
 if __name__ == "__main__":
-    mpns = ["BX8071512400", "SNV3S/2000G", "BX8071512100F", "100-100000910WOF"]
-    mpn = mpns[2]
+    mpns = ["BX8071512400", "SNV3S/2000G", "BX8071512100F", "100-100000910WOF", "100-100001015BOX", "BX80768285"]
+    mpn = mpns[-1]
     
     print("="*50)
     print(f"🔍 Price Scout Results for MPN: {mpn}")

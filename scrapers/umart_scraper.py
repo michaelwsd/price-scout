@@ -7,8 +7,8 @@ from type.base_scraper import BaseScraper
 
 logger = logging.getLogger(__name__)
 
-class JWComputersScraper(BaseScraper):
-    vendor_id: str = "jwcomputers"
+class UmartScraper(BaseScraper):
+    vendor_id: str = "umart"
     currency: str = "AUD" 
 
     async def scrape(self, mpn: str) -> PriceResult:
@@ -62,7 +62,7 @@ class JWComputersScraper(BaseScraper):
                 )
                 return None
 
-            price_text = soup.select("span.price")[-1]
+            price_text = soup.select_one("span.price")
             if not price_text:
                 logger.warning(
                     "Price not found for MPN=%s on JW Computers page %s",
@@ -71,7 +71,7 @@ class JWComputersScraper(BaseScraper):
                 )
                 return None
             else:
-                price_text = price_text.get_text(strip=True).replace(",", "")[1:]
+                price_text = price_text.get_text(strip=True)[1:]
 
             await browser.close()
 

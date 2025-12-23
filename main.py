@@ -17,7 +17,6 @@ logging.basicConfig(
 
 logger = logging.getLogger("price-scout")
 
-
 # -----------------------------------------------------------------------------
 # Main entry point
 # -----------------------------------------------------------------------------
@@ -56,30 +55,20 @@ def main():
         pccg_result = asyncio.run(pccg_scraper.scrape(mpn))
         jwc_result = asyncio.run(jwc_scraper.scrape(mpn))
 
-        if scorptec_result:
-            logger.info("Scorptec result for %s: %s", mpn, scorptec_result)
-        else:
-            logger.warning("No Scorptec result found for %s", mpn)
+        if scorptec_result: logger.info("Scorptec result for %s: %s", mpn, scorptec_result)
+        else: logger.warning("No Scorptec result found for %s", mpn)
 
-        if mwave_result:
-            logger.info("Mwave result for %s: %s", mpn, mwave_result)
-        else:
-            logger.warning("No Mwave result found for %s", mpn)
+        if mwave_result: logger.info("Mwave result for %s: %s", mpn, mwave_result)
+        else: logger.warning("No Mwave result found for %s", mpn)
 
-        if pccg_result:
-            logger.info("PC Case Gear result for %s: %s", mpn, pccg_result)
-        else:
-            logger.warning("No PC Case Gear result found for %s", mpn)
+        if pccg_result: logger.info("PC Case Gear result for %s: %s", mpn, pccg_result)
+        else: logger.warning("No PC Case Gear result found for %s", mpn)
 
-        if jwc_result:
-            logger.info("JW Computers result for %s: %s", mpn, jwc_result)
-        else:
-            logger.warning("No JW Computers result found for %s", mpn)
-
+        if jwc_result: logger.info("JW Computers result for %s: %s", mpn, jwc_result)
+        else: logger.warning("No JW Computers result found for %s", mpn)
 
     except Exception:
         logger.exception("Scraping failed for MPN=%s", mpn)
-
 
 # -----------------------------------------------------------------------------
 # Entrypoint
