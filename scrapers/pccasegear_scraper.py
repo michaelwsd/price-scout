@@ -17,6 +17,8 @@ class PCCaseGearScraper(BaseScraper):
             browser = await p.chromium.launch(headless=True)
             page = await browser.new_page()
 
+            logger.info("Scraping PC Case Gear for MPN=%s", mpn)
+
             await page.goto(
                 url,
                 wait_until="networkidle" # wait for JS requests
@@ -46,7 +48,7 @@ class PCCaseGearScraper(BaseScraper):
 
             # # get mpn
             mpn_div = product.select_one("span.product-model")
-            if not mpn_div or mpn_div.get_text().strip() != mpn:
+            if not mpn_div or mpn_div.get_text(strip=True) != mpn:
                 logger.warning(
                     "Product not found for MPN=%s on PC Case Gear page %s",
                     mpn,
@@ -64,7 +66,7 @@ class PCCaseGearScraper(BaseScraper):
                 )
                 return None
             else:
-                price_text = price_text.get_text().strip()[1:]
+                price_text = price_text.get_text(strip=True)[1:]
 
             await browser.close()
 

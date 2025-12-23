@@ -5,8 +5,6 @@ from playwright.async_api import async_playwright
 
 scraper = cloudscraper.create_scraper() # Returns a CloudScraper instance
 
-mpns = ["BX8071512400", "SNV3S/2000G", "BX8071512100F", "100-100000910WOF"]
-
 def test_single_scorptec(mpn):
     r = scraper.get(f"https://www.scorptec.com.au/search/go?w={mpn}&cnt=1")
     soup = BeautifulSoup(r.text, 'lxml')
@@ -31,14 +29,14 @@ def test_single_mwave(mpn):
 
     model_element = soup.select_one("span.sku")
     if model_element:
-        model_number = model_element.get_text().split()[-1]
+        model_number = model_element.get_text(strip=True).split()[-1]
         print(f"MPN: {model_number}")
     else:
         print("MPN: Not found")
     
     price_element = soup.select_one("div.divPriceNormal")
     if price_element:
-        price = price_element.get_text().strip().replace(",", "")[1:]
+        price = price_element.get_text(strip=True).replace(",", "")[1:]
         print(f"Price: {float(price)}")
     else:
         print("Price: Not found")
@@ -69,11 +67,11 @@ async def test_single_pccg(mpn):
 
         # # get mpn
         model = product.select_one("span.product-model")
-        if not model or model.get_text().strip() != mpn:
+        if not model or model.get_text(strip=True) != mpn:
             print("MPN: Not found")
             return 
 
-        print(f"Model: {model.get_text().strip()}")
+        print(f"Model: {model.get_text(strip=True)}")
 
         # # get price
         price = product.select_one("div.price")
@@ -81,7 +79,7 @@ async def test_single_pccg(mpn):
             print("Price: Not found")
             return 
 
-        print(f"Price: {float(price.get_text().strip()[1:])}")
+        print(f"Price: {float(price.get_text(strip=True)[1:])}")
 
         await browser.close()
 
@@ -91,44 +89,49 @@ async def test_single_jwc(mpn):
         page = await browser.new_page()
 
         await page.goto(
-            f"https://www.pccasegear.com/search?query={mpn}",
+            f"https://www.jw.com.au/catalogsearch/result/?q={mpn}",
             wait_until="networkidle" # wait for JS requests
             )
 
         html = await page.content()
         soup = BeautifulSoup(html, 'lxml')
 
-        product_lst = soup.select_one("ul.ais-Hits-list")
+        product_lst = soup.select_one("ol.ais-InfiniteHits-list")
         if not product_lst:
             print("Product: Not found")
             return 
         
         # # get the first item
-        product = product_lst.select_one("li.ais-Hits-item")
+        product = product_lst.select_one("li.ais-InfiniteHits-item")
         if not product:
             print("Product: Not found")
             return 
 
-        # # get mpn
-        model = product.select_one("span.product-model")
-        if not model or model.get_text().strip() != mpn:
-            print("MPN: Not found")
+        # get price from link
+        link = product.select_one("a.result")["href"]
+
+        await page.goto(link)
+        html = await page.content()
+        soup = BeautifulSoup(html, 'lxml')
+    
+        model = soup.select_one("div.value[itemprop='mpn']")
+        if not model:
+            print("Model: Not found")
             return 
+        else:
+            print(f"Model: {model.get_text(strip=True)}")
 
-        print(f"Model: {model.get_text().strip()}")
-
-        # # get price
-        price = product.select_one("div.price")
+        price = soup.select_one("span.price")
         if not price:
             print("Price: Not found")
-            return 
-
-        print(f"Price: {float(price.get_text().strip()[1:])}")
+        else:
+            print(F"Price: {float(price.get_text(strip=True)[1:])}")
 
         await browser.close()
 
 if __name__ == "__main__":
-    mpn = "BX8071512400"
+    mpns = ["BX8071512400", "SNV3S/2000G", "BX8071512100F", "100-100000910WOF"]
+    mpn = mpns[0]
     
     print("="*50)
     print(f"🔍 Price Scout Results for MPN: {mpn}")
@@ -145,6 +148,10 @@ if __name__ == "__main__":
     # PCCG (async)
     print("\n--- PC Case Gear ---")
     asyncio.run(test_single_pccg(mpn))
+
+    # JW Computers
+    print("\n--- JW Computers ---")
+    asyncio.run(test_single_jwc(mpn))
  
     print("\n" + "="*50)
     print("✅ All scrapers completed")
