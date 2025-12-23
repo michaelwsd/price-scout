@@ -7,14 +7,14 @@ from type.base_scraper import BaseScraper
 
 logger = logging.getLogger(__name__)
 
-class ScorptecScraper(BaseScraper):
-    vendor_id: str = "scorptec"
+class MwaveScraper(BaseScraper):
+    vendor_id: str = "mwave"
     currency: str = "AUD" 
 
     def scrape(self, mpn: str) -> PriceResult:
         self.clean_mpn(mpn) # replace all / with -
         scraper = cloudscraper.create_scraper()
-        url = f"https://www.scorptec.com.au/search/go?w={mpn}&cnt=1"
+        url = f"https://www.mwave.com.au/searchresult?button=go&w={mpn}&cnt=1"
         
         logger.info("Scraping Scorptec for MPN=%s", mpn)
 

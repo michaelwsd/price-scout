@@ -15,7 +15,7 @@ logger = logging.getLogger("price-scout")
 
 
 # -----------------------------------------------------------------------------
-# Main async entry point
+# Main entry point
 # -----------------------------------------------------------------------------
 def main():
     """Main entry point with argument parsing and routing."""
