@@ -6,7 +6,8 @@ from playwright.async_api import async_playwright
 scraper = cloudscraper.create_scraper() # Returns a CloudScraper instance
 
 def test_single_scorptec(mpn):
-    r = scraper.get(f"https://www.scorptec.com.au/search/go?w={mpn}&cnt=1")
+    url = f"https://www.scorptec.com.au/search/go?w={mpn}&cnt=1"
+    r = scraper.get(url)
     soup = BeautifulSoup(r.text, 'lxml')
 
     price_element = soup.select_one("div.product-page-price.product-main-price")
@@ -22,9 +23,13 @@ def test_single_scorptec(mpn):
         print(f"Price: {float(price_element.get_text(strip=True))}")
     else:
         print("Price: Not found")
+        return
+
+    print(f"Link: {url}")
 
 def test_single_mwave(mpn):
-    r = scraper.get(f"https://www.mwave.com.au/searchresult?button=go&w={mpn}&cnt=1")
+    url = f"https://www.mwave.com.au/searchresult?button=go&w={mpn}&cnt=1"
+    r = scraper.get(url)
     soup = BeautifulSoup(r.text, 'lxml')
 
     model_element = soup.select_one("span.sku")
@@ -33,6 +38,7 @@ def test_single_mwave(mpn):
         print(f"MPN: {model_number}")
     else:
         print("MPN: Not found")
+        return
     
     price_element = soup.select_one("div.divPriceNormal")
     if price_element:
@@ -40,6 +46,9 @@ def test_single_mwave(mpn):
         print(f"Price: {float(price)}")
     else:
         print("Price: Not found")
+        return
+    
+    print(f"Link: {url}")
 
 async def test_single_pccg(mpn):
     async with async_playwright() as p:
@@ -64,9 +73,6 @@ async def test_single_pccg(mpn):
         if not product:
             print("Product: Not found")
             return 
-        
-        # link = product.select_one("a.product-title")["href"]
-        # print("https://www.pccasegear.com" + link)
 
         # get mpn
         model = product.select_one("span.product-model")
@@ -83,6 +89,9 @@ async def test_single_pccg(mpn):
             return 
 
         print(f"Price: {float(price.get_text(strip=True)[1:])}")
+
+        link = "https://www.pccasegear.com" + product.select_one("a.product-title")["href"]
+        print(f"Link: {link}")
 
         await browser.close()
 
@@ -121,14 +130,16 @@ async def test_single_jwc(mpn):
         if not model:
             print("Model: Not found")
             return 
-        else:
-            print(f"Model: {model.get_text(strip=True)}")
+        
+        print(f"Model: {model.get_text(strip=True)}")
 
         price = soup.select_one("span.price")
         if not price:
             print("Price: Not found")
-        else:
-            print(F"Price: {float(price.get_text(strip=True)[1:])}")
+            return 
+        
+        print(f"Price: {float(price.get_text(strip=True)[1:])}")
+        print(f"Link: {link}")
 
         await browser.close()
 
@@ -180,27 +191,27 @@ async def test_single_ca(mpn):
 
 if __name__ == "__main__":
     mpns = ["BX8071512400", "SNV3S/2000G", "BX8071512100F", "100-100000910WOF"]
-    mpn = mpns[0]
+    mpn = mpns[2]
     
     print("="*50)
     print(f"🔍 Price Scout Results for MPN: {mpn}")
     print("="*50)
     
-    # # Scorptec
-    # print("\n--- Scorptec ---")
-    # test_single_scorptec(mpn)
+    # Scorptec
+    print("\n--- Scorptec ---")
+    test_single_scorptec(mpn)
     
-    # # Mwave
-    # print("\n--- Mwave ---")
-    # test_single_mwave(mpn)
+    # Mwave
+    print("\n--- Mwave ---")
+    test_single_mwave(mpn)
     
     # PCCG (async)
     print("\n--- PC Case Gear ---")
     asyncio.run(test_single_pccg(mpn))
 
-    # # JW Computers
-    # print("\n--- JW Computers ---")
-    # asyncio.run(test_single_jwc(mpn))
+    # JW Computers
+    print("\n--- JW Computers ---")
+    asyncio.run(test_single_jwc(mpn))
  
     print("\n" + "="*50)
     print("✅ All scrapers completed")
