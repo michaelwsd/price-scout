@@ -1,7 +1,10 @@
 import logging
+import asyncio
 import argparse
 
 from scrapers.scorptec_scraper import ScorptecScraper
+from scrapers.mwave_scraper import MwaveScraper
+from scrapers.pccasegear_scraper import PCCaseGearScraper
 
 # -----------------------------------------------------------------------------
 # Logging configuration
@@ -15,7 +18,7 @@ logger = logging.getLogger("price-scout")
 
 
 # -----------------------------------------------------------------------------
-# Main async entry point
+# Main entry point
 # -----------------------------------------------------------------------------
 def main():
     """Main entry point with argument parsing and routing."""
@@ -42,15 +45,29 @@ def main():
     logger.info("Searching for MPN=%s", mpn)
 
     scorptec_scraper = ScorptecScraper()
+    mwave_scraper = MwaveScraper()
+    pccg_scraper = PCCaseGearScraper()
 
     try:
-        result = scorptec_scraper.scrape(mpn)
+        scorptec_result = asyncio.run(scorptec_scraper.scrape(mpn))
+        mwave_result = asyncio.run(mwave_scraper.scrape(mpn))
+        pccg_result = asyncio.run(pccg_scraper.scrape(mpn))
 
-        if result:
-            logger.info("Scrape successful for %s", mpn)
-            print(result)
+        if scorptec_result:
+            logger.info("Scorptec result for %s: %s", mpn, scorptec_result)
         else:
-            logger.warning("No result found for %s", mpn)
+            logger.warning("No Scorptec result found for %s", mpn)
+
+        if mwave_result:
+            logger.info("Mwave result for %s: %s", mpn, mwave_result)
+        else:
+            logger.warning("No Mwave result found for %s", mpn)
+
+        if pccg_result:
+            logger.info("PC Case Gear result for %s: %s", mpn, pccg_result)
+        else:
+            logger.warning("No PC Case Gear result found for %s", mpn)
+
 
     except Exception:
         logger.exception("Scraping failed for MPN=%s", mpn)

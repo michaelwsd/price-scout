@@ -1,10 +1,102 @@
 import cloudscraper
+import asyncio
 from bs4 import BeautifulSoup
+from playwright.async_api import async_playwright
 
 scraper = cloudscraper.create_scraper() # Returns a CloudScraper instance
-mpn = "GV-N3050OC-6GL"
-r = scraper.get(f"https://www.scorptec.com.au/search/go?w={mpn}&cnt=1")
-soup = BeautifulSoup(r.text, 'lxml')
-print(soup.select_one("div.product-page-price.product-main-price"))
-print(soup.select_one("div.product-page-model"))
-print(r.url)
+
+def test_many():
+    mpns = ["BX8071512400", "SNV3S-2000G", "BX8071512100F"]
+
+    for mpn in mpns:
+        r = scraper.get(f"https://www.scorptec.com.au/search/go?w={mpn}&cnt=1")
+        soup = BeautifulSoup(r.text, 'lxml')
+        print(soup.select_one("div.product-page-price.product-main-price"))
+        print(soup.select_one("div.product-page-model"))
+        print(r.url)
+
+def test_single_scorptec(mpn):
+    r = scraper.get(f"https://www.scorptec.com.au/search/go?w={mpn}&cnt=1")
+    soup = BeautifulSoup(r.text, 'lxml')
+
+    price_element = soup.select_one("div.product-page-price.product-main-price")
+    model_element = soup.select_one("div.product-page-model")
+    
+    if model_element and model_element.get_text(strip=True) == mpn:
+        print(f"MPN: {model_element.get_text(strip=True)}")
+    else:
+        print("MPN: Not found")
+        return
+    
+    if price_element:
+        print(f"Price: {price_element.get_text(strip=True)}")
+    else:
+        print("Price: Not found")
+
+    print(f"URL: {r.url}")
+
+def test_single_mwave(mpn):
+    r = scraper.get(f"https://www.mwave.com.au/searchresult?button=go&w={mpn}&cnt=1")
+    soup = BeautifulSoup(r.text, 'lxml')
+
+    model_element = soup.select_one("span.sku")
+    if model_element:
+        model_number = model_element.get_text().split()[-1]
+        print(f"MPN: {model_number}")
+    else:
+        print("MPN: Not found")
+    
+    price_element = soup.select_one("div.divPriceNormal")
+    if price_element:
+        price = price_element.get_text().strip().replace(",", "")[1:]
+        print(f"Price: {price}")
+    else:
+        print("Price: Not found")
+
+async def test_single_pccg(mpn):
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        page = await browser.new_page()
+
+        await page.goto(
+            f"https://www.pccasegear.com/search?query={mpn}",
+            wait_until="networkidle" # wait for JS requests
+            )
+
+        html = await page.content()
+        soup = BeautifulSoup(html, 'lxml')
+
+        product_lst = soup.select_one("ul.ais-Hits-list")
+        if not product_lst:
+            print("Product: Not found")
+            return 
+        
+        # # get the first item
+        product = product_lst.select_one("li.ais-Hits-item")
+        if not product:
+            print("Product: Not found")
+            return 
+
+        # # get mpn
+        model = product.select_one("span.product-model")
+        if not model or model.get_text().strip() != mpn:
+            print("MPN: Not found")
+            return 
+
+        print(f"Model: {model.get_text().strip()}")
+
+        # # get price
+        price = product.select_one("div.price")
+        if not price:
+            print("Price: Not found")
+            return 
+
+        print(f"Price: {price.get_text().strip()[1:]}")
+
+        await browser.close()
+
+if __name__ == "__main__":
+    # test_single_scorptec("100-300000077")
+    # test_single_mwave("100-300000077")
+    asyncio.run(test_single_pccg("BX8071512400"))
+    # test_single_jwc("BX8071512400")
