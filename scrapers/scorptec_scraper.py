@@ -1,8 +1,9 @@
-from bs4 import BeautifulSoup
 import cloudscraper
 import logging
-from type.base_scraper import BaseScraper
+from bs4 import BeautifulSoup
+
 from type.models import PriceResult
+from type.base_scraper import BaseScraper
 
 logger = logging.getLogger(__name__)
 

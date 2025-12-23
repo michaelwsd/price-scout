@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import argparse
 
@@ -18,7 +17,7 @@ logger = logging.getLogger("price-scout")
 # -----------------------------------------------------------------------------
 # Main async entry point
 # -----------------------------------------------------------------------------
-async def main():
+def main():
     """Main entry point with argument parsing and routing."""
 
     parser = argparse.ArgumentParser(
@@ -61,4 +60,4 @@ async def main():
 # Entrypoint
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
