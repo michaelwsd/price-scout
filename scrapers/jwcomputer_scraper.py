@@ -8,7 +8,7 @@ from type.base_scraper import BaseScraper
 logger = logging.getLogger(__name__)
 
 class JWComputersScraper(BaseScraper):
-    vendor_id: str = "pccasegear"
+    vendor_id: str = "jwcomputers"
     currency: str = "AUD" 
 
     async def scrape(self, mpn: str) -> PriceResult:
@@ -36,7 +36,7 @@ class JWComputersScraper(BaseScraper):
                 )
                 return None
             
-            # # get the first item
+            # get the first item
             product = product_lst.select_one("li.ais-InfiniteHits-item")
             if not product:
                 logger.warning(
@@ -77,7 +77,7 @@ class JWComputersScraper(BaseScraper):
 
         return PriceResult(
             vendor_id=self.vendor_id,
-            url=url,
+            url=link,
             mpn=mpn,
             price=price_text,
             currency=self.currency,

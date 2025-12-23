@@ -36,7 +36,7 @@ class PCCaseGearScraper(BaseScraper):
                 )
                 return None
             
-            # # get the first item
+            # get the first item
             product = product_lst.select_one("li.ais-Hits-item")
             if not product:
                 logger.warning(
@@ -46,7 +46,10 @@ class PCCaseGearScraper(BaseScraper):
                 )
                 return None
 
-            # # get mpn
+            # get link 
+            link = "https://www.pccasegear.com" + product.select_one("a.product-title")["href"]
+
+            # get mpn
             mpn_div = product.select_one("span.product-model")
             if not mpn_div or mpn_div.get_text(strip=True) != mpn:
                 logger.warning(
@@ -56,7 +59,7 @@ class PCCaseGearScraper(BaseScraper):
                 )
                 return None
 
-            # # get price
+            # get price
             price_text = product.select_one("div.price")
             if not price_text:
                 logger.warning(
@@ -72,7 +75,7 @@ class PCCaseGearScraper(BaseScraper):
 
         return PriceResult(
             vendor_id=self.vendor_id,
-            url=url,
+            url=link,
             mpn=mpn,
             price=price_text,
             currency=self.currency,
