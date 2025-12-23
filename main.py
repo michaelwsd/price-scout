@@ -2,6 +2,7 @@ import logging
 import argparse
 
 from scrapers.scorptec_scraper import ScorptecScraper
+from scrapers.mwave_scraper import MwaveScraper
 
 # -----------------------------------------------------------------------------
 # Logging configuration
@@ -42,15 +43,21 @@ def main():
     logger.info("Searching for MPN=%s", mpn)
 
     scorptec_scraper = ScorptecScraper()
+    mwave_scraper = MwaveScraper()
 
     try:
-        result = scorptec_scraper.scrape(mpn)
+        scorptec_result = scorptec_scraper.scrape(mpn)
+        mwave_result = mwave_scraper.scrape(mpn)
 
-        if result:
-            logger.info("Scrape successful for %s", mpn)
-            print(result)
+        if scorptec_result:
+            logger.info("Scorptec result for %s: %s", mpn, scorptec_result)
         else:
-            logger.warning("No result found for %s", mpn)
+            logger.warning("No Scorptec result found for %s", mpn)
+
+        if mwave_result:
+            logger.info("Mwave result for %s: %s", mpn, mwave_result)
+        else:
+            logger.warning("No Mwave result found for %s", mpn)
 
     except Exception:
         logger.exception("Scraping failed for MPN=%s", mpn)

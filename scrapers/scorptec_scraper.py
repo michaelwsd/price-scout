@@ -12,7 +12,6 @@ class ScorptecScraper(BaseScraper):
     currency: str = "AUD" 
 
     def scrape(self, mpn: str) -> PriceResult:
-        self.clean_mpn(mpn) # replace all / with -
         scraper = cloudscraper.create_scraper()
         url = f"https://www.scorptec.com.au/search/go?w={mpn}&cnt=1"
         
@@ -23,7 +22,7 @@ class ScorptecScraper(BaseScraper):
             res.raise_for_status()
         except Exception as e:
             logger.error("HTTP error fetching %s: %s", url, e)
-            raise
+            return None
 
         soup = BeautifulSoup(res.text, "lxml")
 
@@ -35,7 +34,7 @@ class ScorptecScraper(BaseScraper):
                 mpn,
                 url,
             )
-            raise ValueError("Product not found")
+            return None
         
         # check for price
         price_div = soup.select_one("div.product-page-price.product-main-price")
@@ -45,7 +44,7 @@ class ScorptecScraper(BaseScraper):
                 mpn,
                 url,
             )
-            raise ValueError("Price element not found")
+            return None 
 
         price_text = price_div.get_text(strip=True)
         logger.debug("Raw price text extracted: %s", price_text)

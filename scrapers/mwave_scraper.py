@@ -12,42 +12,41 @@ class MwaveScraper(BaseScraper):
     currency: str = "AUD" 
 
     def scrape(self, mpn: str) -> PriceResult:
-        self.clean_mpn(mpn) # replace all / with -
         scraper = cloudscraper.create_scraper()
         url = f"https://www.mwave.com.au/searchresult?button=go&w={mpn}&cnt=1"
         
-        logger.info("Scraping Scorptec for MPN=%s", mpn)
+        logger.info("Scraping Mwave for MPN=%s", mpn)
 
         try:
             res = scraper.get(url, timeout=20)
             res.raise_for_status()
         except Exception as e:
             logger.error("HTTP error fetching %s: %s", url, e)
-            raise
+            return None
 
         soup = BeautifulSoup(res.text, "lxml")
 
         # check if mpn matches
-        mpn_div = soup.select_one("div.product-page-model")
-        if not mpn_div or mpn_div.get_text(strip=True) != mpn:
+        mpn_div = soup.select_one("span.sku")
+        if not mpn_div or mpn_div.get_text().split()[-1] != mpn:
             logger.warning(
                 "Product not found for MPN=%s on Scorptec page %s",
                 mpn,
                 url,
             )
-            raise ValueError("Product not found")
+            return None
         
         # check for price
-        price_div = soup.select_one("div.product-page-price.product-main-price")
+        price_div = soup.select_one("div.divPriceNormal")
         if not price_div:
             logger.warning(
                 "Price not found for MPN=%s on Scorptec page %s",
                 mpn,
                 url,
             )
-            raise ValueError("Price element not found")
+            return None
 
-        price_text = price_div.get_text(strip=True)
+        price_text = price_div.get_text().strip().replace(",", "")[1:]
         logger.debug("Raw price text extracted: %s", price_text)
 
         return PriceResult(

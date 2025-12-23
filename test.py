@@ -37,6 +37,21 @@ def test_single_mwave(mpn):
     r = scraper.get(f"https://www.mwave.com.au/searchresult?button=go&w={mpn}&cnt=1")
     soup = BeautifulSoup(r.text, 'lxml')
 
+    model_element = soup.select_one("span.sku")
+    if model_element:
+        model_number = model_element.get_text().split()[-1]
+        print(model_number)
+    else:
+        print("MPN: Not found")
+    
+    price_element = soup.select_one("div.divPriceNormal")
+    if price_element:
+        price = price_element.get_text().strip().replace(",", "")[1:]
+        print(price)
+    else:
+        print("Price: Not found")
+
+
 if __name__ == "__main__":
-    test_single_scorptec("BX8071512400")
-    test_single_mwave("BX8071512400")
+    test_single_scorptec("100-300000077")
+    test_single_mwave("100-300000077")
