@@ -1,8 +1,10 @@
 import logging
+import asyncio
 import argparse
 
 from scrapers.scorptec_scraper import ScorptecScraper
 from scrapers.mwave_scraper import MwaveScraper
+from scrapers.pccasegear_scraper import PCCaseGearScraper
 
 # -----------------------------------------------------------------------------
 # Logging configuration
@@ -44,10 +46,12 @@ def main():
 
     scorptec_scraper = ScorptecScraper()
     mwave_scraper = MwaveScraper()
+    pccg_scraper = PCCaseGearScraper()
 
     try:
-        scorptec_result = scorptec_scraper.scrape(mpn)
-        mwave_result = mwave_scraper.scrape(mpn)
+        scorptec_result = asyncio.run(scorptec_scraper.scrape(mpn))
+        mwave_result = asyncio.run(mwave_scraper.scrape(mpn))
+        pccg_result = asyncio.run(pccg_scraper.scrape(mpn))
 
         if scorptec_result:
             logger.info("Scorptec result for %s: %s", mpn, scorptec_result)
@@ -58,6 +62,12 @@ def main():
             logger.info("Mwave result for %s: %s", mpn, mwave_result)
         else:
             logger.warning("No Mwave result found for %s", mpn)
+
+        if pccg_result:
+            logger.info("PC Case Gear result for %s: %s", mpn, pccg_result)
+        else:
+            logger.warning("No PC Case Gear result found for %s", mpn)
+
 
     except Exception:
         logger.exception("Scraping failed for MPN=%s", mpn)

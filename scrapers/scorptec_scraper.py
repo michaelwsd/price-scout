@@ -1,4 +1,5 @@
 import cloudscraper
+import asyncio
 import logging
 from bs4 import BeautifulSoup
 
@@ -11,7 +12,11 @@ class ScorptecScraper(BaseScraper):
     vendor_id: str = "scorptec"
     currency: str = "AUD" 
 
-    def scrape(self, mpn: str) -> PriceResult:
+    async def scrape(self, mpn: str) -> PriceResult:
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, self.scrape_sync, mpn)
+
+    def scrape_sync(self, mpn: str) -> PriceResult:
         scraper = cloudscraper.create_scraper()
         url = f"https://www.scorptec.com.au/search/go?w={mpn}&cnt=1"
         

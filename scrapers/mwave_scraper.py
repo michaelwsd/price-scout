@@ -1,4 +1,5 @@
 import cloudscraper
+import asyncio
 import logging
 from bs4 import BeautifulSoup
 
@@ -11,7 +12,11 @@ class MwaveScraper(BaseScraper):
     vendor_id: str = "mwave"
     currency: str = "AUD" 
 
-    def scrape(self, mpn: str) -> PriceResult:
+    async def scrape(self, mpn: str) -> PriceResult:
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, self.scrape_sync, mpn)
+    
+    def scrape_sync(self, mpn: str) -> PriceResult:
         scraper = cloudscraper.create_scraper()
         url = f"https://www.mwave.com.au/searchresult?button=go&w={mpn}&cnt=1"
         
@@ -30,7 +35,7 @@ class MwaveScraper(BaseScraper):
         mpn_div = soup.select_one("span.sku")
         if not mpn_div or mpn_div.get_text().split()[-1] != mpn:
             logger.warning(
-                "Product not found for MPN=%s on Scorptec page %s",
+                "Product not found for MPN=%s on Mwave page %s",
                 mpn,
                 url,
             )
@@ -40,7 +45,7 @@ class MwaveScraper(BaseScraper):
         price_div = soup.select_one("div.divPriceNormal")
         if not price_div:
             logger.warning(
-                "Price not found for MPN=%s on Scorptec page %s",
+                "Price not found for MPN=%s on Mwave page %s",
                 mpn,
                 url,
             )
