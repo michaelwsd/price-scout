@@ -1,6 +1,5 @@
-import asyncio
 import time
-import csv
+import asyncio
 import pandas as pd
 from io import StringIO
 from scraper import scrape_mpn_single
