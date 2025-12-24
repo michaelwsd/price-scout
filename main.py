@@ -4,10 +4,9 @@ import argparse
 
 from scrapers.scorptec_scraper import ScorptecScraper
 from scrapers.mwave_scraper import MwaveScraper
-from scrapers.pccasegear_scraper import PCCaseGearScraper
-from scrapers.jwcomputer_scraper import JWComputersScraper
+from scrapers.pc_case_gear_scraper import PCCaseGearScraper
+from scrapers.jw_computer_scraper import JWComputersScraper
 from scrapers.umart_scraper import UmartScraper
-from scrapers.computeralliance_scraper import ComputerAllianceScraper
 
 # -----------------------------------------------------------------------------
 # Logging configuration
@@ -51,7 +50,6 @@ def main():
     pccg_scraper = PCCaseGearScraper()
     jwc_scraper = JWComputersScraper()
     umart_scraper = UmartScraper()
-    ca = ComputerAllianceScraper()
 
     try:
         scorptec_result = asyncio.run(scorptec_scraper.scrape(mpn))
@@ -59,7 +57,6 @@ def main():
         pccg_result = asyncio.run(pccg_scraper.scrape(mpn))
         jwc_result = asyncio.run(jwc_scraper.scrape(mpn))
         umart_result = asyncio.run(umart_scraper.scrape(mpn))
-        ca_result = asyncio.run(ca.scrape(mpn))
 
         if scorptec_result: logger.info("Scorptec result for %s: %s", mpn, scorptec_result)
         else: logger.warning("No Scorptec result found for %s", mpn)
@@ -75,9 +72,6 @@ def main():
 
         if umart_result: logger.info("Umart result for %s: %s", mpn, umart_result)
         else: logger.warning("No Umart result found for %s", mpn)
-
-        if ca_result: logger.info("CA result for %s: %s", mpn, ca_result)
-        else: logger.warning("No CA result found for %s", mpn)
 
     except Exception:
         logger.exception("Scraping failed for MPN=%s", mpn)
