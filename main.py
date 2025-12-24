@@ -1,6 +1,7 @@
 import time
 import logging
 import asyncio
+import argparse
 
 from scrapers.scorptec_scraper import ScorptecScraper
 from scrapers.mwave_scraper import MwaveScraper
@@ -19,11 +20,15 @@ logging.basicConfig(
 logger = logging.getLogger("price-scout")
 
 # -----------------------------------------------------------------------------
-# Scrape all 5 vendors for a single MPN concurrently
+# Main entry point
 # -----------------------------------------------------------------------------
-async def scrape_mpn_single(mpn):
+async def main():
+    """Main entry point with argument parsing and routing."""
     start = time.perf_counter()
-    mpn = mpn.strip()
+    parser = argparse.ArgumentParser(description="Computer Parts Price Comparison Tool")
+    parser.add_argument("--mpn", required=True)
+    args = parser.parse_args()
+    mpn = args.mpn.strip()
 
     logger.info("Starting price scout for MPN=%s", mpn)
 
@@ -56,7 +61,7 @@ async def scrape_mpn_single(mpn):
 # Entrypoint
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
-    results = asyncio.run(scrape_mpn_single())
+    results = asyncio.run(main())
     
     for r in results:
         print(r)
