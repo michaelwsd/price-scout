@@ -50,7 +50,7 @@ with tab_single:
         st.markdown("### Detailed Vendor Info")
         for res in results:
             with st.expander(f"{vendor_names[res.vendor_id]}"):
-                    st.markdown(f"**Price:** {res.price} {res.currency if res.price else 'Not Found'}")
+                st.markdown(f"**Price:** {res.price} {res.currency if res.price else 'Not Found'}")
                 st.markdown(f"**URL:** [{res.url}]({res.url})" if res.url else "**URL:** Not Found")
                 st.markdown(f"**Scraped At:** {res.scraped_at.strftime('%Y-%m-%d %H:%M:%S')}")
                 st.markdown(f"**Found:** {'✅' if res.found else '❌'}")
