@@ -67,7 +67,7 @@ with tab_single:
 
         st.dataframe(
             df_single,
-            column_config={"Price": st.column_config.NumberColumn(format="$%.2f"), "URL": st.column_config.LinkColumn()},
+            column_config={"Price": st.column_config.NumberColumn(format="$%.2f"), "URL": st.column_config.LinkColumn(label="Link", display_text="Link")},
             width='stretch', hide_index=True
         )
 
