@@ -10,6 +10,14 @@ logger = logging.getLogger(__name__)
 class PCCaseGearScraper(BaseScraper):
     vendor_id: str = "pc_case_gear"
     currency: str = "AUD" 
+    not_found: PriceResult = PriceResult(
+                                vendor_id=vendor_id,
+                                url=None,
+                                mpn=None,
+                                price=None,
+                                currency=None,
+                                found=False
+                                )
 
     async def scrape(self, mpn: str) -> PriceResult:
         url = f"https://www.pccasegear.com/search?query={mpn}"
@@ -34,7 +42,7 @@ class PCCaseGearScraper(BaseScraper):
                     mpn,
                     url,
                 )
-                return None
+                return self.not_found
             
             # get the first item
             product = product_lst.select_one("li.ais-Hits-item")
@@ -44,7 +52,7 @@ class PCCaseGearScraper(BaseScraper):
                     mpn,
                     url,
                 )
-                return None
+                return self.not_found
 
             # get link 
             link = "https://www.pccasegear.com" + product.select_one("a.product-title")["href"]
@@ -57,7 +65,7 @@ class PCCaseGearScraper(BaseScraper):
                     mpn,
                     url,
                 )
-                return None
+                return self.not_found
 
             # get price
             price_text = product.select_one("div.price")
@@ -67,7 +75,7 @@ class PCCaseGearScraper(BaseScraper):
                     mpn,
                     url,
                 )
-                return None
+                return self.not_found
             else:
                 price_text = price_text.get_text(strip=True)[1:]
 
@@ -79,4 +87,5 @@ class PCCaseGearScraper(BaseScraper):
             mpn=mpn,
             price=price_text,
             currency=self.currency,
+            found=True
         )

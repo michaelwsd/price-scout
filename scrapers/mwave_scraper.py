@@ -11,6 +11,14 @@ logger = logging.getLogger(__name__)
 class MwaveScraper(BaseScraper):
     vendor_id: str = "mwave"
     currency: str = "AUD" 
+    not_found: PriceResult = PriceResult(
+                                vendor_id=vendor_id,
+                                url=None,
+                                mpn=None,
+                                price=None,
+                                currency=None,
+                                found=False
+                                )
 
     async def scrape(self, mpn: str) -> PriceResult:
         loop = asyncio.get_running_loop()
@@ -27,7 +35,7 @@ class MwaveScraper(BaseScraper):
             res.raise_for_status()
         except Exception as e:
             logger.error("HTTP error fetching %s: %s", url, e)
-            return None
+            return self.not_found
 
         soup = BeautifulSoup(res.text, "lxml")
 
@@ -39,7 +47,7 @@ class MwaveScraper(BaseScraper):
                 mpn,
                 url,
             )
-            return None
+            return self.not_found
         
         # check for price
         price_div = soup.select_one("div.divPriceNormal")
@@ -49,7 +57,7 @@ class MwaveScraper(BaseScraper):
                 mpn,
                 url,
             )
-            return None
+            return self.not_found
 
         price_text = price_div.get_text(strip=True).replace(",", "")[1:]
         logger.debug("Raw price text extracted: %s", price_text)
@@ -60,4 +68,5 @@ class MwaveScraper(BaseScraper):
             mpn=mpn,
             price=price_text,
             currency=self.currency,
+            found=True
         )

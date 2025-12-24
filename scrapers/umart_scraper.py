@@ -10,6 +10,14 @@ logger = logging.getLogger(__name__)
 class UmartScraper(BaseScraper):
     vendor_id: str = "umart"
     currency: str = "AUD" 
+    not_found: PriceResult = PriceResult(
+                                vendor_id=vendor_id,
+                                url=None,
+                                mpn=None,
+                                price=None,
+                                currency=None,
+                                found=False
+                                )
 
     async def scrape(self, mpn: str) -> PriceResult:
         url = f"https://www.umart.com.au/search.php?cat_id=&keywords={mpn}"
@@ -34,7 +42,7 @@ class UmartScraper(BaseScraper):
                     mpn,
                     url,
                 )
-                return None
+                return self.not_found
             
             # get the first item
             product = product_lst.select_one("li.goods_info.search_goods_list")
@@ -44,7 +52,7 @@ class UmartScraper(BaseScraper):
                     mpn,
                     url,
                 )
-                return None
+                return self.not_found
 
             # get price from link
             link = "https://www.umart.com.au/" + product.select_one("a")["href"]
@@ -60,7 +68,7 @@ class UmartScraper(BaseScraper):
                     mpn,
                     url,
                 )
-                return None
+                return self.not_found
 
             price_text = soup.select_one("span.goods-price.ele-goods-price")
             if not price_text:
@@ -69,7 +77,7 @@ class UmartScraper(BaseScraper):
                     mpn,
                     url,
                 )
-                return None
+                return self.not_found
             else:
                 price_text = price_text.get_text(strip=True)
 
@@ -81,4 +89,5 @@ class UmartScraper(BaseScraper):
             mpn=mpn,
             price=price_text,
             currency=self.currency,
+            found=True
         )
