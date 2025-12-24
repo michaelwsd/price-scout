@@ -5,6 +5,7 @@ from .models import PriceResult
 class BaseScraper(BaseModel, ABC):
     vendor_id: str
     currency: str
+    not_found: PriceResult
 
     class Config:
         arbitrary_types_allowed = True 

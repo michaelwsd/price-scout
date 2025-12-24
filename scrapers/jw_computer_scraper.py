@@ -10,9 +10,18 @@ logger = logging.getLogger(__name__)
 class JWComputersScraper(BaseScraper):
     vendor_id: str = "jw_computers"
     currency: str = "AUD" 
+    not_found: PriceResult = PriceResult(
+                                vendor_id=vendor_id,
+                                url=None,
+                                mpn=None,
+                                price=None,
+                                currency=None,
+                                found=False
+                                )
 
     async def scrape(self, mpn: str) -> PriceResult:
         url = f"https://www.jw.com.au/catalogsearch/result/?q={mpn}"
+
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
             page = await browser.new_page()
@@ -34,7 +43,7 @@ class JWComputersScraper(BaseScraper):
                     mpn,
                     url,
                 )
-                return None
+                return self.not_found
             
             # get the first item
             product = product_lst.select_one("li.ais-InfiniteHits-item")
@@ -44,7 +53,7 @@ class JWComputersScraper(BaseScraper):
                     mpn,
                     url,
                 )
-                return None
+                return self.not_found
 
             # get price from link
             link = product.select_one("a.result")["href"]
@@ -60,7 +69,7 @@ class JWComputersScraper(BaseScraper):
                     mpn,
                     url,
                 )
-                return None
+                return self.not_found
 
             price_text = soup.select("span.price")[-1]
             if not price_text:
@@ -69,7 +78,7 @@ class JWComputersScraper(BaseScraper):
                     mpn,
                     url,
                 )
-                return None
+                return self.not_found
             else:
                 price_text = price_text.get_text(strip=True).replace(",", "")[1:]
 
@@ -81,4 +90,5 @@ class JWComputersScraper(BaseScraper):
             mpn=mpn,
             price=price_text,
             currency=self.currency,
+            found=True
         )
