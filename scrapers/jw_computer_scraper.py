@@ -7,15 +7,17 @@ from type.base_scraper import BaseScraper
 
 logger = logging.getLogger(__name__)
 
-class PCCaseGearScraper(BaseScraper):
-    vendor_id: str = "pccasegear"
+class JWComputersScraper(BaseScraper):
+    vendor_id: str = "jw_computers"
     currency: str = "AUD" 
 
     async def scrape(self, mpn: str) -> PriceResult:
-        url = f"https://www.pccasegear.com/search?query={mpn}"
+        url = f"https://www.jw.com.au/catalogsearch/result/?q={mpn}"
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
             page = await browser.new_page()
+
+            logger.info("Scraping JW Computers for MPN=%s", mpn)
 
             await page.goto(
                 url,
@@ -25,52 +27,57 @@ class PCCaseGearScraper(BaseScraper):
             html = await page.content()
             soup = BeautifulSoup(html, 'lxml')
 
-            product_lst = soup.select_one("ul.ais-Hits-list")
+            product_lst = soup.select_one("ol.ais-InfiniteHits-list")
             if not product_lst:
                 logger.warning(
-                    "Product not found for MPN=%s on PC Case Gear page %s",
+                    "Product not found for MPN=%s on JW Computers page %s",
                     mpn,
                     url,
                 )
                 return None
             
-            # # get the first item
-            product = product_lst.select_one("li.ais-Hits-item")
+            # get the first item
+            product = product_lst.select_one("li.ais-InfiniteHits-item")
             if not product:
                 logger.warning(
-                    "Product not found for MPN=%s on PC Case Gear page %s",
+                    "Product not found for MPN=%s on JW Computers page %s",
                     mpn,
                     url,
                 )
                 return None
 
-            # # get mpn
-            mpn_div = product.select_one("span.product-model")
-            if not mpn_div or mpn_div.get_text().strip() != mpn:
+            # get price from link
+            link = product.select_one("a.result")["href"]
+
+            await page.goto(link)
+            html = await page.content()
+            soup = BeautifulSoup(html, 'lxml')
+        
+            mpn_div = soup.select_one("div.value[itemprop='mpn']")
+            if not mpn_div or mpn_div.get_text(strip=True) != mpn:
                 logger.warning(
-                    "Product not found for MPN=%s on PC Case Gear page %s",
+                    "Product not found for MPN=%s on JW Computers page %s",
                     mpn,
                     url,
                 )
                 return None
 
-            # # get price
-            price_text = product.select_one("div.price")
+            price_text = soup.select("span.price")[-1]
             if not price_text:
                 logger.warning(
-                    "Price not found for MPN=%s on PC Case Gear page %s",
+                    "Price not found for MPN=%s on JW Computers page %s",
                     mpn,
                     url,
                 )
                 return None
             else:
-                price_text = price_text.get_text().strip()[1:]
+                price_text = price_text.get_text(strip=True).replace(",", "")[1:]
 
             await browser.close()
 
         return PriceResult(
             vendor_id=self.vendor_id,
-            url=url,
+            url=link,
             mpn=mpn,
             price=price_text,
             currency=self.currency,

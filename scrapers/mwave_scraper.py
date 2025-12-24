@@ -33,7 +33,7 @@ class MwaveScraper(BaseScraper):
 
         # check if mpn matches
         mpn_div = soup.select_one("span.sku")
-        if not mpn_div or mpn_div.get_text().split()[-1] != mpn:
+        if not mpn_div or mpn_div.get_text(strip=True).split()[-1] != mpn:
             logger.warning(
                 "Product not found for MPN=%s on Mwave page %s",
                 mpn,
@@ -51,7 +51,7 @@ class MwaveScraper(BaseScraper):
             )
             return None
 
-        price_text = price_div.get_text().strip().replace(",", "")[1:]
+        price_text = price_div.get_text(strip=True).replace(",", "")[1:]
         logger.debug("Raw price text extracted: %s", price_text)
 
         return PriceResult(
