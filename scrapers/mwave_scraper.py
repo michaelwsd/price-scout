@@ -3,8 +3,8 @@ import asyncio
 import logging
 from bs4 import BeautifulSoup
 
-from type.models import PriceResult
-from type.base_scraper import BaseScraper
+from models.models import PriceResult
+from models.base_scraper import BaseScraper
 
 logger = logging.getLogger(__name__)
 
