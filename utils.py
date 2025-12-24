@@ -1,5 +1,4 @@
 import asyncio
-import logging
 
 from scrapers.scorptec_scraper import ScorptecScraper
 from scrapers.mwave_scraper import MwaveScraper
@@ -16,21 +15,17 @@ scrapers = [
             ]
 
 async def scrape_mpn_single(mpn):
-    """Run all 5 vendor scrapers concurrently for a single MPN"""
+    """Scrape all 5 vendors for a single MPN concurrently"""
 
-    root_logger = logging.getLogger()
-    old_level = root_logger.level
-    root_logger.setLevel(logging.ERROR)
+    mpn = mpn.strip()
+    tasks = [scraper.scrape(mpn) for _, scraper in scrapers] # coroutine objects
+    results = await asyncio.gather(*tasks, return_exceptions=True)
 
-    try:
-        tasks = [scraper.scrape(mpn.strip()) for _, scraper in scrapers]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        return results
-    finally:
-        root_logger.setLevel(old_level)
+    return results
 
 
 if __name__ == "__main__":
-    res = asyncio.run(scrape_mpn_single("BX8071512400"))
+    res = asyncio.run(scrape_mpn_single("ST8000VN002"))
     for r in res:
         print(r)
+        print()

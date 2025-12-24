@@ -54,7 +54,7 @@ async def main():
     # log time
     elapsed = time.perf_counter() - start
     logger.info("All scrapers completed in %.2f seconds", elapsed)
-    
+
     return results
 
 # -----------------------------------------------------------------------------
@@ -62,4 +62,7 @@ async def main():
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
     results = asyncio.run(main())
-    print(results)
+    
+    for r in results:
+        print(r)
+        print()
