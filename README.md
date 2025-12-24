@@ -4,11 +4,11 @@ TODOs:
 
 [X] Add multi-threading
 
-[ ] Add batch processing
+[X] Add batch processing
 
 [ ] Database design
 
-[ ] Streamlit dashboard
+[X] Streamlit dashboard
 
 [ ] Analytics
 
