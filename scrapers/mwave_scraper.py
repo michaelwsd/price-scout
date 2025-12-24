@@ -66,7 +66,7 @@ class MwaveScraper(BaseScraper):
             vendor_id=self.vendor_id,
             url=url,
             mpn=mpn,
-            price=price_text,
+            price=float(price_text),
             currency=self.currency,
             found=True
         )

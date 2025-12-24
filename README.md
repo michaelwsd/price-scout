@@ -2,7 +2,7 @@ TODOs:
 
 [X] Implement scrapers for all 5 vendors
 
-[ ] Add multi-threading
+[X] Add multi-threading
 
 [ ] Add batch processing
 

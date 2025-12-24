@@ -26,11 +26,16 @@ class PCCaseGearScraper(BaseScraper):
             page = await browser.new_page()
 
             logger.info("Scraping PC Case Gear for MPN=%s", mpn)
-
-            await page.goto(
-                url,
-                wait_until="networkidle" # wait for JS requests
+            
+            try:
+                await page.goto(
+                    url,
+                    wait_until="networkidle",  # wait for JS requests
+                    timeout=60000              # 60 seconds
                 )
+            except Exception as e:
+                logger.warning("Page failed to load for MPN=%s at %s: %s", mpn, url, e)
+                return self.not_found
 
             html = await page.content()
             soup = BeautifulSoup(html, 'lxml')
@@ -85,7 +90,7 @@ class PCCaseGearScraper(BaseScraper):
             vendor_id=self.vendor_id,
             url=link,
             mpn=mpn,
-            price=price_text,
+            price=float(price_text),
             currency=self.currency,
             found=True
         )
