@@ -6,6 +6,9 @@ import csv
 from typing import List
 from decimal import Decimal
 
+# Database imports
+from database import init_db, save_result
+
 from scrapers.scorptec_scraper import ScorptecScraper
 from scrapers.mwave_scraper import MwaveScraper
 from scrapers.pc_case_gear_scraper import PCCaseGearScraper
@@ -69,8 +72,7 @@ async def scrape_single_mpn_async(mpn: str, scrapers):
 async def batch_scrape_mpns(mpns: List[str], scrapers):
     """Batch scrape multiple MPNs concurrently with a semaphore limit."""
 
-    # Limit concurrency to 5 MPNs at a time to avoid rate limiting
-    # (Since each MPN triggers 5 internal requests, this equals ~25 total concurrent connections)
+    # Limit concurrency to 5 MPNs at a time
     semaphore = asyncio.Semaphore(5)
 
     async def bounded_scrape(index, mpn):
@@ -152,6 +154,10 @@ def write_results_to_csv(results, output_path: str):
 # -----------------------------------------------------------------------------
 async def main():
     """Main entry point with argument parsing and routing."""
+
+    # Initialize Database
+    init_db()
+
     start = time.perf_counter()
 
     parser = argparse.ArgumentParser(
@@ -195,6 +201,8 @@ async def main():
                 logger.error("%s scraper failed: %s", vendor, result)
             elif result:
                 logger.info("%s result: %s", vendor, result)
+                # Save to DB
+                save_result(result)
             else:
                 logger.warning("No %s result found", vendor)
 
@@ -213,6 +221,13 @@ async def main():
 
         # Batch scrape
         batch_results = await batch_scrape_mpns(mpns, scrapers)
+
+        # Save batch results to DB
+        logger.info("Saving batch results to database...")
+        for mpn, result_dict in batch_results:
+            for vendor_name, result_obj in result_dict.items():
+                if result_obj:
+                    save_result(result_obj)
 
         # Write to CSV
         write_results_to_csv(batch_results, output_path)
