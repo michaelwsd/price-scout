@@ -2,7 +2,9 @@ import time
 import asyncio
 import pandas as pd
 from io import StringIO
+from datetime import datetime
 from scraper import scrape_mpn_single
+from db.db_manager import DatabaseManager
 import streamlit as st
 
 vendor_names = {
@@ -12,6 +14,40 @@ vendor_names = {
     "jw_computers": "JW Computers",
     "umart": "Umart"
 }
+
+# --- DATABASE INITIALIZATION ---
+@st.cache_resource
+def get_db_connection():
+    """Initializes the DatabaseManager only once and caches the instance."""
+    return DatabaseManager()
+
+# Use the cached instance
+db = get_db_connection()
+
+def process_and_save_result(mpn: str, vendor_name: str, found: bool, price: float):
+    """
+    Process a single vendor result and save to database if found.
+    If price changed: add new record
+    If price same: update timestamp
+    """
+    if not found or price is None:
+        return
+
+    # Get the latest price for this MPN and vendor
+    price_history = db.get_price_history(mpn, vendor_name)
+
+    if not price_history:
+        # No previous record, add new price
+        db.add_price(mpn, vendor_name, price, datetime.now())
+    else:
+        # Check if price has changed
+        latest_price = price_history[0]['price']
+        if abs(latest_price - price) > 0.01:  # Allow for small floating point differences
+            # Price changed, add new record
+            db.add_price(mpn, vendor_name, price, datetime.now())
+        else:
+            # Price same, update timestamp by adding a new record with same price
+            db.add_price(mpn, vendor_name, price, datetime.now())
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="Price Scout", page_icon="💻", layout="wide")
@@ -46,7 +82,7 @@ def render_custom_metric(label, value, border_color="#1E88E5"):
 st.title("💻 Computer Parts Price Scout")
 st.divider()
 
-tab_single, tab_batch = st.tabs(["🔍 Single MPN Query", "📁 CSV Batch Processing"])
+tab_single, tab_batch, tab_analytics = st.tabs(["🔍 Single MPN Query", "📁 CSV Batch Processing", "📊 Analytics"])
 
 # --- TAB 1: SINGLE QUERY (Logic kept same, UI polished) ---
 with tab_single:
@@ -57,7 +93,17 @@ with tab_single:
     if st.button("Fetch Prices", type="primary") and mpn_input:
         with st.spinner(f"Searching {mpn_input}..."):
             results = asyncio.run(scrape_mpn_single(mpn_input.strip()))
-        
+
+        # Process and save results to database
+        for res in results:
+            vendor_display_name = vendor_names.get(res.vendor_id, res.vendor_id)
+            process_and_save_result(
+                mpn=mpn_input.strip(),
+                vendor_name=vendor_display_name,
+                found=res.found,
+                price=float(res.price) if res.price else None
+            )
+
         df_single = pd.DataFrame([{
             "Vendor": vendor_names.get(res.vendor_id, res.vendor_id),
             "Price": float(res.price) if res.price else None,
@@ -106,10 +152,20 @@ with tab_batch:
                     progress_bar.progress((i + 1) / len(mpns_to_scan))
                     results = asyncio.run(scrape_mpn_single(mpn))
 
+                    # Process and save results to database
+                    for res in results:
+                        vendor_display_name = vendor_names.get(res.vendor_id, res.vendor_id)
+                        process_and_save_result(
+                            mpn=mpn.strip(),
+                            vendor_name=vendor_display_name,
+                            found=res.found,
+                            price=float(res.price) if res.price else None
+                        )
+
                     mpn_result = {'MPN': mpn}
                     prices = [float(res.price) for res in results if res.price]
                     lowest_price = min(prices) if prices else None
-                    
+
                     for res in results:
                         mpn_result[f'{vendor_names[res.vendor_id]} Price'] = float(res.price) if res.price else None
 
@@ -157,3 +213,147 @@ with tab_batch:
                 )
 
                 st.download_button("📥 Export Results", df_final.to_csv(index=False), "results.csv", "text/csv")
+
+# --- TAB 3: ANALYTICS ---
+with tab_analytics:
+    st.markdown("### 📈 Price Analytics & Trends")
+
+    # Get all MPNs with price data
+    available_mpns = db.get_all_mpns_with_prices()
+
+    if not available_mpns:
+        st.info("📭 No price data available yet. Search for some products first to see analytics!")
+    else:
+        # MPN selector
+        selected_mpn = st.selectbox(
+            "Select MPN to analyze:",
+            options=available_mpns,
+            help="Choose a product to view its price trends and statistics"
+        )
+
+        if selected_mpn:
+            st.divider()
+
+            # Get analytics data
+            price_trends = db.get_price_trends_by_mpn(selected_mpn)
+            avg_data = db.get_average_prices_by_mpn(selected_mpn)
+
+            # Section 1: Price Trends Chart
+            st.markdown(f"#### 📊 Price Trends for {selected_mpn}")
+
+            if price_trends:
+                # Prepare data for line chart
+                chart_data = []
+                for vendor, prices in price_trends.items():
+                    for price_point in prices:
+                        chart_data.append({
+                            'Date': pd.to_datetime(price_point['date']),
+                            'Price': price_point['price'],
+                            'Vendor': vendor
+                        })
+
+                df_trends = pd.DataFrame(chart_data)
+
+                # Create pivot table for better visualization
+                df_pivot = df_trends.pivot_table(
+                    index='Date',
+                    columns='Vendor',
+                    values='Price',
+                    aggfunc='first'
+                ).reset_index()
+
+                # Display line chart
+                st.line_chart(
+                    df_pivot.set_index('Date'),
+                    width='content',
+                    height=400
+                )
+
+                # Show summary statistics
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    st.markdown("##### 📍 Current Prices")
+                    latest_prices = []
+                    for vendor, prices in price_trends.items():
+                        if prices:
+                            latest = prices[-1]
+                            latest_prices.append({
+                                'Vendor': vendor,
+                                'Current Price': f"${latest['price']:.2f}",
+                                'Last Updated': pd.to_datetime(latest['date']).strftime('%Y-%m-%d %H:%M')
+                            })
+
+                    df_latest = pd.DataFrame(latest_prices)
+                    st.dataframe(df_latest, hide_index=True, width='content')
+
+                with col2:
+                    st.markdown("##### 📉 Price Range by Vendor")
+                    price_ranges = []
+                    for vendor, prices in price_trends.items():
+                        if prices:
+                            vendor_prices = [p['price'] for p in prices]
+                            price_ranges.append({
+                                'Vendor': vendor,
+                                'Min': f"${min(vendor_prices):.2f}",
+                                'Max': f"${max(vendor_prices):.2f}",
+                                'Range': f"${max(vendor_prices) - min(vendor_prices):.2f}"
+                            })
+
+                    df_ranges = pd.DataFrame(price_ranges)
+                    st.dataframe(df_ranges, hide_index=True, width='content')
+
+            st.divider()
+
+            # Section 2: Average Prices
+            st.markdown(f"#### 💰 Average Price Analysis for {selected_mpn}")
+
+            if avg_data['overall_avg']:
+                # Display overall average with custom metric
+                c1, c2, c3 = st.columns(3)
+                with c1:
+                    render_custom_metric(
+                        "Overall Average Price",
+                        f"${avg_data['overall_avg']:.2f}",
+                        "#7C3AED"
+                    )
+
+                # Find cheapest and most expensive vendor on average
+                if avg_data['vendor_avgs']:
+                    cheapest = avg_data['vendor_avgs'][0]
+                    most_expensive = avg_data['vendor_avgs'][-1]
+
+                    with c2:
+                        render_custom_metric(
+                            "Cheapest (Avg)",
+                            f"{cheapest['vendor_name']}: ${cheapest['avg_price']:.2f}",
+                            "#10B981"
+                        )
+
+                    with c3:
+                        render_custom_metric(
+                            "Most Expensive (Avg)",
+                            f"{most_expensive['vendor_name']}: ${most_expensive['avg_price']:.2f}",
+                            "#EF4444"
+                        )
+
+                # Display vendor averages table
+                st.markdown("##### 📊 Average Prices by Vendor")
+                df_avg = pd.DataFrame(avg_data['vendor_avgs'])
+                df_avg['avg_price'] = df_avg['avg_price'].apply(lambda x: f"${x:.2f}")
+                df_avg.columns = ['Vendor', 'Average Price', 'Data Points']
+
+                st.dataframe(
+                    df_avg,
+                    hide_index=True,
+                    width='content'
+                )
+
+                # Bar chart for average prices
+                st.markdown("##### 📊 Average Price Comparison")
+                df_bar = pd.DataFrame(avg_data['vendor_avgs'])
+                df_bar['avg_price_num'] = df_bar['avg_price']
+                df_bar = df_bar.set_index('vendor_name')
+                st.bar_chart(df_bar['avg_price_num'], width='content', height=300)
+            else:
+                st.warning("No price data available for this MPN yet.")

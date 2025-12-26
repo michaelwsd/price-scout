@@ -9,5 +9,4 @@ class PriceResult(BaseModel):
     mpn: Optional[str] = None
     price: Optional[Decimal] = None
     currency: Optional[str] = None
-    scraped_at: datetime.datetime = Field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc))
     found: bool 
