@@ -6,10 +6,10 @@ TODOs:
 
 [X] Add batch processing
 
-[ ] Database design
+[X] Database design
 
 [X] Streamlit dashboard
 
-[ ] Analytics
+[X] Analytics
 
 [ ] Deployment
