@@ -149,6 +149,46 @@ class DatabaseManager:
             logger.error(f"Error adding price: {e}")
             return None
 
+    def update_price_timestamp(self, mpn: str, vendor_name: str,
+                               scraped_at: datetime = None) -> bool:
+        """
+        Update the scraped_at timestamp of the most recent price record
+        for a specific product and vendor.
+        Returns True if successful, False otherwise.
+        """
+        if scraped_at is None:
+            scraped_at = datetime.now()
+
+        product = self.get_product_by_mpn(mpn)
+        if not product:
+            logger.warning(f"Cannot update timestamp: Product '{mpn}' not found")
+            return False
+
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    UPDATE prices
+                    SET scraped_at = ?
+                    WHERE id = (
+                        SELECT id FROM prices
+                        WHERE product_id = ? AND vendor_name = ?
+                        ORDER BY scraped_at DESC
+                        LIMIT 1
+                    )
+                """, (scraped_at.isoformat(), product['id'], vendor_name))
+                conn.commit()
+
+                if cursor.rowcount > 0:
+                    logger.info(f"Updated timestamp: {mpn} - {vendor_name}")
+                    return True
+                else:
+                    logger.warning(f"No price record found to update: {mpn} - {vendor_name}")
+                    return False
+        except sqlite3.Error as e:
+            logger.error(f"Error updating timestamp: {e}")
+            return False
+
     def get_prices_by_mpn(self, mpn: str) -> List[Dict]:
         """Get all price records for a specific MPN"""
         with self._get_connection() as conn:
@@ -340,25 +380,26 @@ if __name__ == "__main__":
 
     # Initialize database
     db = init_database()
-    
-    # Add some sample data
-    print("Adding sample products and prices...")
-    db.add_price("MPN-12345", "Vendor A", 99.99)
-    db.add_price("MPN-12345", "Vendor B", 95.50)
-    db.add_price("MPN-67890", "Vendor A", 149.99)
+    db.clear_database()
+      
+    # # Add some sample data
+    # print("Adding sample products and prices...")
+    # db.add_price("MPN-12345", "Vendor A", 99.99)
+    # db.add_price("MPN-12345", "Vendor B", 95.50)
+    # db.add_price("MPN-67890", "Vendor A", 149.99)
 
-    # Query data
-    print("\nAll products:")
-    products = db.get_all_products()
-    for product in products:
-        print(f"  ID: {product['id']}, MPN: {product['mpn']}")
+    # # Query data
+    # print("\nAll products:")
+    # products = db.get_all_products()
+    # for product in products:
+    #     print(f"  ID: {product['id']}, MPN: {product['mpn']}")
 
-    print("\nLatest prices for MPN-12345:")
-    prices = db.get_latest_prices_by_mpn("MPN-12345")
-    for price in prices:
-        print(f"  {price['vendor_name']}: ${price['price']} (at {price['scraped_at']})")
+    # print("\nLatest prices for MPN-12345:")
+    # prices = db.get_latest_prices_by_mpn("MPN-12345")
+    # for price in prices:
+    #     print(f"  {price['vendor_name']}: ${price['price']} (at {price['scraped_at']})")
 
-    print("\nPrice history for MPN-12345 from Vendor A:")
-    history = db.get_price_history("MPN-12345", "Vendor A")
-    for record in history:
-        print(f"  ${record['price']} at {record['scraped_at']}")
+    # print("\nPrice history for MPN-12345 from Vendor A:")
+    # history = db.get_price_history("MPN-12345", "Vendor A")
+    # for record in history:
+    #     print(f"  ${record['price']} at {record['scraped_at']}")
