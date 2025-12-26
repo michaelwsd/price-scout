@@ -144,21 +144,13 @@ python main.py --csv input.csv --output results.csv
 
 ### CSV Format for Batch Processing
 
-Your CSV file must contain either an `mpn` or `name` column:
+Your CSV file must contain either an `mpn` column:
 
 ```csv
 mpn
 BX8071512400
 SNV3S/2000G
 BX8071512100F
-```
-
-Or with names:
-```csv
-name
-Intel Core i5-12400
-Kingston NV3 2TB SSD
-Intel Core i5-12100F
 ```
 
 ## How It Works
