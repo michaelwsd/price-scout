@@ -6,6 +6,8 @@ from datetime import datetime
 from scraper import scrape_mpn_single
 from db.db_manager import DatabaseManager
 import streamlit as st
+import plotly.graph_objects as go
+import plotly.express as px
 
 vendor_names = {
     "scorptec": "Scorptec Computers",
@@ -28,7 +30,7 @@ def process_and_save_result(mpn: str, vendor_name: str, found: bool, price: floa
     """
     Process a single vendor result and save to database if found.
     If price changed: add new record
-    If price same: update timestamp
+    If price same: update timestamp of existing record
     """
     if not found or price is None:
         return
@@ -46,8 +48,8 @@ def process_and_save_result(mpn: str, vendor_name: str, found: bool, price: floa
             # Price changed, add new record
             db.add_price(mpn, vendor_name, price, datetime.now())
         else:
-            # Price same, update timestamp by adding a new record with same price
-            db.add_price(mpn, vendor_name, price, datetime.now())
+            # Price same, update timestamp of existing record
+            db.update_price_timestamp(mpn, vendor_name, datetime.now())
 
 # --- PAGE CONFIG ---
 st.set_page_config(page_title="Price Scout", page_icon="💻", layout="wide")
@@ -254,20 +256,56 @@ with tab_analytics:
 
                 df_trends = pd.DataFrame(chart_data)
 
-                # Create pivot table for better visualization
-                df_pivot = df_trends.pivot_table(
-                    index='Date',
-                    columns='Vendor',
-                    values='Price',
-                    aggfunc='first'
-                ).reset_index()
+                # Create interactive line chart with visible markers using Plotly
+                fig = go.Figure()
 
-                # Display line chart - full width
-                st.line_chart(
-                    df_pivot.set_index('Date'),
-                    width='stretch',
-                    height=450
+                # Define colors for different vendors
+                colors = px.colors.qualitative.Set2
+
+                # Add a line for each vendor
+                for idx, vendor in enumerate(df_trends['Vendor'].unique()):
+                    vendor_data = df_trends[df_trends['Vendor'] == vendor].sort_values('Date')
+
+                    fig.add_trace(go.Scatter(
+                        x=vendor_data['Date'],
+                        y=vendor_data['Price'],
+                        mode='lines+markers',  # Show both lines and markers
+                        name=vendor,
+                        line=dict(width=3, color=colors[idx % len(colors)]),
+                        marker=dict(size=8, symbol='circle'),
+                        hovertemplate='<b>%{fullData.name}</b><br>' +
+                                      'Date: %{x|%Y-%m-%d %H:%M}<br>' +
+                                      'Price: $%{y:.2f}<br>' +
+                                      '<extra></extra>'
+                    ))
+
+                # Update layout for better appearance
+                fig.update_layout(
+                    height=450,
+                    hovermode='closest',
+                    xaxis=dict(
+                        title='Date',
+                        showgrid=True,
+                        gridcolor='rgba(128,128,128,0.2)'
+                    ),
+                    yaxis=dict(
+                        title='Price ($)',
+                        showgrid=True,
+                        gridcolor='rgba(128,128,128,0.2)'
+                    ),
+                    legend=dict(
+                        orientation='h',
+                        yanchor='bottom',
+                        y=1.02,
+                        xanchor='right',
+                        x=1
+                    ),
+                    plot_bgcolor='white',
+                    margin=dict(l=0, r=0, t=40, b=0)
                 )
+
+                # Display the chart
+                st.plotly_chart(fig, width='stretch')
 
                 # Show summary statistics
                 col1, col2 = st.columns(2)
