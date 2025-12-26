@@ -144,7 +144,7 @@ python main.py --csv input.csv --output results.csv
 
 ### CSV Format for Batch Processing
 
-Your CSV file must contain either an `mpn` column:
+Your CSV file must contain an `mpn` column:
 
 ```csv
 mpn
