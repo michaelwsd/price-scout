@@ -262,11 +262,11 @@ with tab_analytics:
                     aggfunc='first'
                 ).reset_index()
 
-                # Display line chart
+                # Display line chart - full width
                 st.line_chart(
                     df_pivot.set_index('Date'),
-                    width='content',
-                    height=400
+                    width='stretch',
+                    height=450
                 )
 
                 # Show summary statistics
@@ -285,7 +285,7 @@ with tab_analytics:
                             })
 
                     df_latest = pd.DataFrame(latest_prices)
-                    st.dataframe(df_latest, hide_index=True, width='content')
+                    st.dataframe(df_latest, hide_index=True, width='stretch')
 
                 with col2:
                     st.markdown("##### 📉 Price Range by Vendor")
@@ -301,7 +301,7 @@ with tab_analytics:
                             })
 
                     df_ranges = pd.DataFrame(price_ranges)
-                    st.dataframe(df_ranges, hide_index=True, width='content')
+                    st.dataframe(df_ranges, hide_index=True, width='stretch')
 
             st.divider()
 
@@ -337,23 +337,29 @@ with tab_analytics:
                             "#EF4444"
                         )
 
-                # Display vendor averages table
-                st.markdown("##### 📊 Average Prices by Vendor")
-                df_avg = pd.DataFrame(avg_data['vendor_avgs'])
-                df_avg['avg_price'] = df_avg['avg_price'].apply(lambda x: f"${x:.2f}")
-                df_avg.columns = ['Vendor', 'Average Price', 'Data Points']
+                st.markdown("")  # Add spacing
 
-                st.dataframe(
-                    df_avg,
-                    hide_index=True,
-                    width='content'
-                )
+                # Display vendor averages table and chart side by side
+                col_table, col_chart = st.columns([1, 2])
 
-                # Bar chart for average prices
-                st.markdown("##### 📊 Average Price Comparison")
-                df_bar = pd.DataFrame(avg_data['vendor_avgs'])
-                df_bar['avg_price_num'] = df_bar['avg_price']
-                df_bar = df_bar.set_index('vendor_name')
-                st.bar_chart(df_bar['avg_price_num'], width='content', height=300)
+                with col_table:
+                    st.markdown("##### 📊 Average Prices by Vendor")
+                    df_avg = pd.DataFrame(avg_data['vendor_avgs'])
+                    df_avg['avg_price'] = df_avg['avg_price'].apply(lambda x: f"${x:.2f}")
+                    df_avg.columns = ['Vendor', 'Average Price', 'Data Points']
+
+                    st.dataframe(
+                        df_avg,
+                        hide_index=True,
+                        width='stretch',
+                        height=350
+                    )
+
+                with col_chart:
+                    st.markdown("##### 📊 Average Price Comparison")
+                    df_bar = pd.DataFrame(avg_data['vendor_avgs'])
+                    df_bar['avg_price_num'] = df_bar['avg_price']
+                    df_bar = df_bar.set_index('vendor_name')
+                    st.bar_chart(df_bar['avg_price_num'], width='stretch', height=350)
             else:
                 st.warning("No price data available for this MPN yet.")
