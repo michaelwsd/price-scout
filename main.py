@@ -24,7 +24,7 @@ import logging
 import asyncio
 import argparse
 
-from scrapers.scorptec_scraper import ScorptecScraper
+from scrapers.scorptec.scorptec_scraper_http import ScorptecScraper
 from scrapers.mwave_scraper import MwaveScraper
 from scrapers.pccg.pc_case_gear_scraper_http import PCCaseGearScraper
 from scrapers.umart.umart_scraper_http import UmartScraper

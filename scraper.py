@@ -18,7 +18,7 @@ import logging
 import asyncio
 from typing import List
 
-from scrapers.scorptec_scraper import ScorptecScraper
+from scrapers.scorptec.scorptec_scraper_http import ScorptecScraper
 from scrapers.mwave_scraper import MwaveScraper
 from scrapers.pccg.pc_case_gear_scraper_http import PCCaseGearScraper
 from scrapers.jwc.jw_computer_scraper_http import JWComputersScraper

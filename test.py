@@ -8,8 +8,13 @@ from playwright.async_api import async_playwright
 from scrapers.jwc.jw_computer_scraper_http import JWComputersScraper
 from scrapers.pccg.pc_case_gear_scraper_http import PCCaseGearScraper
 from scrapers.umart.umart_scraper_http import UmartScraper
+from scrapers.scorptec.scorptec_scraper_http import ScorptecScraper
 
 scraper = cloudscraper.create_scraper() # Returns a CloudScraper instance
+
+def test_scorptec_http(mpn):
+    scorptec_scraper = ScorptecScraper()
+    print(asyncio.run(scorptec_scraper.scrape(mpn)))
 
 def test_jwc_http(mpn):
     jwc_scraper = JWComputersScraper()
@@ -199,18 +204,16 @@ async def test_single_umart(mpn):
         await browser.close()
 
 if __name__ == "__main__":  
-    mpns = ["BX8071512400", "SNV3S/2000G", "BX8071512100F", "100-100000910WOF", "100-100001015BOX", "BX80768285", "ST8000VN002"]
+    mpns = ["BX80715124", "SNV3S/2000G", "BX8071512100F", "100-100000910WOF", "100-100001015BOX", "BX80768285", "ST8000VN002"]
     mpn = mpns[0]
     
     print("="*50)
     print(f"🔍 Price Scout Results for MPN: {mpn}")
     print("="*50)
     
-    test_umart_http(mpn)
-
     # Scorptec
     print("\n--- Scorptec ---")
-    test_single_scorptec(mpn)
+    test_scorptec_http(mpn)
     
     # Mwave
     print("\n--- Mwave ---")
