@@ -204,7 +204,7 @@ async def test_single_umart(mpn):
         await browser.close()
 
 if __name__ == "__main__":  
-    mpns = ["BX80715124", "SNV3S/2000G", "BX8071512100F", "100-100000910WOF", "100-100001015BOX", "BX80768285", "ST8000VN002"]
+    mpns = ["BX8071512400", "SNV3S/2000G", "BX8071512100F", "100-100000910WOF", "100-100001015BOX", "BX80768285", "ST8000VN002"]
     mpn = mpns[0]
     
     print("="*50)
