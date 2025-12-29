@@ -42,6 +42,14 @@
   - Updates timestamp when price remains the same
   - Prevents duplicate data while maintaining complete history
 
+## Recent Updates
+
+- **Dual Scraper Implementations**: Added HTTP-based scrapers alongside browser-based versions for improved performance
+- **Fallback Logic**: Enhanced Scorptec scraper with robust fallback mechanisms
+- **Optimized Performance**: Reduced scraping time with lightweight HTTP implementations for CLI
+- **Enhanced Documentation**: Comprehensive docstrings added across all modules
+- **Improved Reliability**: Better error handling and site variation support
+
 ## Technology Stack
 
 - **Python 3.12+**: Core programming language
@@ -49,6 +57,7 @@
 - **Streamlit**: Interactive web dashboard
 - **Playwright**: Browser automation for JavaScript-rendered sites
 - **cloudscraper**: HTTP requests with Cloudflare bypass capability
+- **curl_cffi**: Alternative HTTP client for enhanced reliability
 - **BeautifulSoup4**: HTML parsing
 - **Pandas**: Data manipulation and CSV handling
 - **Plotly**: Interactive data visualizations
@@ -62,14 +71,23 @@ price-scout/
 ├── main.py                     # CLI entry point
 ├── scraper.py                  # Core scraping logic and batch processing
 ├── test.py                     # Manual testing script
+├── requirements.txt            # Python dependencies
 ├── app.db                      # SQLite database (auto-created)
 │
 ├── scrapers/                   # Vendor-specific scraper implementations
-│   ├── scorptec_scraper.py    # Scorptec (cloudscraper)
+│   ├── scorptec/              # Scorptec scraper modules
+│   │   ├── scorptec_scraper_fallback.py  # Fallback implementation
+│   │   └── scorptec_scraper_http.py      # HTTP implementation
 │   ├── mwave_scraper.py       # Mwave (cloudscraper)
-│   ├── pc_case_gear_scraper.py # PC Case Gear (Playwright)
-│   ├── jw_computer_scraper.py  # JW Computers (Playwright)
-│   └── umart_scraper.py        # Umart (Playwright)
+│   ├── pccg/                  # PC Case Gear scraper modules
+│   │   ├── pc_case_gear_scraper.py       # Browser-based implementation
+│   │   └── pc_case_gear_scraper_http.py  # HTTP implementation
+│   ├── jwc/                   # JW Computers scraper modules
+│   │   ├── jw_computer_scraper.py        # Browser-based implementation
+│   │   └── jw_computer_scraper_http.py   # HTTP implementation
+│   └── umart/                 # Umart scraper modules
+│       ├── umart_scraper.py              # Browser-based implementation
+│       └── umart_scraper_http.py         # HTTP implementation
 │
 ├── models/                     # Data models and base classes
 │   ├── models.py              # PriceResult Pydantic model
@@ -102,6 +120,11 @@ price-scout/
 3. **Install dependencies**:
    ```bash
    pip install -r requirements.txt
+   ```
+
+4. **Install Playwright browsers** (required for some scrapers):
+   ```bash
+   playwright install chromium
    ```
 
 ## Usage
@@ -159,8 +182,17 @@ BX8071512100F
 
 ### Scraper Types
 
-- **Static Sites** (Scorptec, Mwave): Use `cloudscraper` for fast HTTP requests with Cloudflare bypass
-- **JavaScript Sites** (PC Case Gear, JW Computers, Umart): Use Playwright headless browser for JavaScript rendering
+Each vendor scraper has been optimized with dual implementation strategies:
+
+- **HTTP Implementations**: Fast, lightweight HTTP requests with `cloudscraper` for Cloudflare bypass
+  - Used by: Scorptec, Mwave, PC Case Gear (HTTP), JW Computers (HTTP), Umart (HTTP)
+  - Best for: CLI batch processing and quick queries
+
+- **Browser-Based Implementations**: Playwright headless browser for JavaScript-heavy sites
+  - Used by: PC Case Gear, JW Computers, Umart
+  - Best for: Sites with dynamic content loading
+
+- **Fallback Logic**: Scorptec includes fallback mechanisms to handle different site responses
 
 ### Database Schema
 
@@ -190,6 +222,10 @@ Modify the script to test specific vendors or MPNs.
 - **Models**: Pydantic models in [models/models.py](models/models.py) ensure data validation
 - **Database**: Centralized database operations in [db/db_manager.py](db/db_manager.py)
 - **Scraper Logic**: Main scraping orchestration in [scraper.py](scraper.py)
+- **Dual Implementations**: Most vendors have both HTTP and browser-based implementations for flexibility
+  - HTTP versions (suffix `_http.py`) used in CLI for better performance
+  - Browser versions used in web dashboard for reliability with dynamic content
+  - Fallback implementations handle edge cases and site variations
 
 ## Limitations
 
