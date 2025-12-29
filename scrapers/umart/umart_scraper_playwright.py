@@ -1,3 +1,6 @@
+"""
+Backup Scraper for Umart
+"""
 import logging
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup

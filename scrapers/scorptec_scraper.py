@@ -1,3 +1,13 @@
+"""
+Scorptec Computers Scraper.
+
+This module implements a web scraper for Scorptec Computers, an Australian
+computer parts retailer. Uses cloudscraper to bypass Cloudflare protection.
+
+Classes:
+    ScorptecScraper: Scraper implementation for www.scorptec.com.au
+"""
+
 import cloudscraper
 import asyncio
 import logging
@@ -6,25 +16,69 @@ from bs4 import BeautifulSoup
 from models.models import PriceResult
 from models.base_scraper import BaseScraper
 
+
 logger = logging.getLogger(__name__)
 
+
 class ScorptecScraper(BaseScraper):
+    """
+    Web scraper for Scorptec Computers (www.scorptec.com.au).
+
+    Scrapes product prices from Scorptec using their search functionality.
+    Implements CloudScraper to handle Cloudflare protection and runs
+    synchronous scraping in an async executor for non-blocking operation.
+
+    Attributes:
+        vendor_id: Identifier "scorptec"
+        currency: "AUD" (Australian Dollar)
+        not_found: Default PriceResult for products not found
+
+    Example:
+        >>> scraper = ScorptecScraper()
+        >>> result = await scraper.scrape("BX8071512100F")
+        >>> print(f"${result.price} at {result.url}")
+    """
+
     vendor_id: str = "scorptec"
-    currency: str = "AUD" 
+    currency: str = "AUD"
     not_found: PriceResult = PriceResult(
-                                vendor_id=vendor_id,
-                                url=None,
-                                mpn=None,
-                                price=None,
-                                currency=None,
-                                found=False
-                                )
+        vendor_id=vendor_id,
+        url=None,
+        mpn=None,
+        price=None,
+        currency=None,
+        found=False
+    )
 
     async def scrape(self, mpn: str) -> PriceResult:
+        """
+        Scrape price data for a given MPN (async wrapper).
+
+        Delegates to scrape_sync() via an async executor to avoid blocking
+        the event loop during HTTP requests and HTML parsing.
+
+        Args:
+            mpn: Manufacturer Part Number to search for.
+
+        Returns:
+            PriceResult with product data if found, or not_found result otherwise.
+        """
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, self.scrape_sync, mpn)
 
     def scrape_sync(self, mpn: str) -> PriceResult:
+        """
+        Synchronous scraping implementation.
+
+        Searches Scorptec's website for the MPN, validates the match,
+        and extracts price information from the product page.
+
+        Args:
+            mpn: Manufacturer Part Number to search for.
+
+        Returns:
+            PriceResult with vendor_id, url, mpn, price, currency, and found status.
+        """
         scraper = cloudscraper.create_scraper()
         url = f"https://www.scorptec.com.au/search/go?w={mpn}&cnt=1"
         

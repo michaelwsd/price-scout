@@ -1,3 +1,6 @@
+"""
+Testing Script for All Vendors
+"""
 import cloudscraper
 import asyncio
 from bs4 import BeautifulSoup
@@ -205,25 +208,25 @@ if __name__ == "__main__":
     
     test_umart_http(mpn)
 
-    # # Scorptec
-    # print("\n--- Scorptec ---")
-    # test_single_scorptec(mpn)
+    # Scorptec
+    print("\n--- Scorptec ---")
+    test_single_scorptec(mpn)
     
-    # # Mwave
-    # print("\n--- Mwave ---")
-    # test_single_mwave(mpn)
+    # Mwave
+    print("\n--- Mwave ---")
+    test_single_mwave(mpn)
     
-    # # PCCG (async)
-    # print("\n--- PC Case Gear ---")
-    # asyncio.run(test_single_pccg(mpn))
+    # PCCG (async)
+    print("\n--- PC Case Gear ---")
+    test_pccg_http(mpn)
 
-    # # JW Computers
-    # print("\n--- JW Computers ---")
-    # asyncio.run(test_single_jwc(mpn))
+    # JW Computers
+    print("\n--- JW Computers ---")
+    test_jwc_http(mpn)
     
-    # # Umart
-    # print("\n--- Umart ---")
-    # asyncio.run(test_single_umart(mpn))
+    # Umart
+    print("\n--- Umart ---")
+    test_umart_http(mpn)
 
     print("\n" + "="*50)
     print("✅ All scrapers completed")

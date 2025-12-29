@@ -1,11 +1,45 @@
+"""
+JW Computers HTTP API Scraper.
+
+This module implements a web scraper for JW Computers using their Algolia search API.
+Bypasses the need for browser automation by directly querying the search API endpoint.
+
+Classes:
+    JWComputersScraper: API-based scraper for www.jw.com.au
+"""
+
 import logging
 from curl_cffi.requests import AsyncSession
 from models.models import PriceResult
 from models.base_scraper import BaseScraper
 
+
 logger = logging.getLogger(__name__)
 
+
 class JWComputersScraper(BaseScraper):
+    """
+    Web scraper for JW Computers (www.jw.com.au) using Algolia API.
+
+    Queries JW Computers' Algolia search backend directly for faster,
+    more reliable scraping without browser automation overhead.
+
+    Implementation Notes:
+        - Uses public Algolia API keys extracted from website
+        - Leverages curl_cffi for browser TLS fingerprinting
+        - Avoids Playwright/Selenium overhead
+
+    Attributes:
+        vendor_id: Identifier "jw_computers"
+        currency: "AUD" (Australian Dollar)
+        not_found: Default PriceResult for products not found
+
+    Example:
+        >>> scraper = JWComputersScraper()
+        >>> result = await scraper.scrape("BX8071512100F")
+        >>> print(f"Found at: {result.url}")
+    """
+
     vendor_id: str = "jw_computers"
     currency: str = "AUD"
     not_found: PriceResult = PriceResult(
@@ -18,6 +52,18 @@ class JWComputersScraper(BaseScraper):
     )
 
     async def scrape(self, mpn: str) -> PriceResult:
+        """
+        Scrape price data by querying Algolia search API.
+
+        Constructs an Algolia API request for the MPN, validates the result,
+        and extracts price and URL information from the JSON response.
+
+        Args:
+            mpn: Manufacturer Part Number to search for.
+
+        Returns:
+            PriceResult with complete product data if found, otherwise not_found result.
+        """
         # JW Computers uses the Algolia search engine API
         url = "https://catalog.jw.com.au/1/indexes/*/queries"
 
@@ -64,7 +110,7 @@ class JWComputersScraper(BaseScraper):
                 results = data.get("results", [])
                 if not results:
                     return self.not_found
-                
+
                 hits = results[0].get("hits", [])
                 if not hits:
                     logger.warning(f"No hits found for MPN={mpn} via API")

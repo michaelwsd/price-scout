@@ -1,3 +1,24 @@
+"""
+Price Scout Command-Line Interface.
+
+This module provides a CLI for querying computer parts prices across multiple
+Australian vendors. Supports both single MPN queries and batch CSV processing.
+
+Usage:
+    Single MPN:
+        python main.py --mpn BX8071512100F
+
+    Batch CSV:
+        python main.py --csv input.csv --output results.csv
+
+Supported Vendors:
+    - Scorptec Computers
+    - Mwave Australia
+    - PC Case Gear
+    - JW Computers
+    - Umart
+"""
+
 import time
 import logging
 import asyncio
@@ -10,9 +31,8 @@ from scrapers.umart.umart_scraper_http import UmartScraper
 from scrapers.jwc.jw_computer_scraper_http import JWComputersScraper
 from scraper import read_mpns_from_csv, batch_scrape_mpns, write_results_to_csv
 
-# -----------------------------------------------------------------------------
+
 # Logging configuration
-# -----------------------------------------------------------------------------
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
@@ -20,11 +40,21 @@ logging.basicConfig(
 
 logger = logging.getLogger("price-scout")
 
-# -----------------------------------------------------------------------------
-# Main entry point
-# -----------------------------------------------------------------------------
+
 async def main():
-    """Main entry point with argument parsing and routing."""
+    """
+    Main entry point for the Price Scout CLI application.
+
+    Parses command-line arguments and routes execution to either:
+    - Single MPN query mode: Scrapes and displays results for one product
+    - CSV batch mode: Processes multiple MPNs from CSV and exports results
+
+    Returns:
+        List of scraper results (single mode) or batch processing results (CSV mode).
+
+    Raises:
+        SystemExit: If required arguments are missing or invalid.
+    """
     start = time.perf_counter()
 
     parser = argparse.ArgumentParser(
@@ -40,7 +70,10 @@ async def main():
     # Make --mpn and --csv mutually exclusive
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--mpn", help="Manufacturer Part Number")
-    group.add_argument("--csv", help="Path to CSV file containing MPNs (must have 'mpn' or 'name' column)")
+    group.add_argument(
+        "--csv",
+        help="Path to CSV file containing MPNs (must have 'mpn' or 'name' column)"
+    )
 
     parser.add_argument("--output", help="Output CSV file path (only used with --csv)")
 
@@ -96,9 +129,6 @@ async def main():
         return batch_results
 
 
-# -----------------------------------------------------------------------------
-# Entrypoint
-# -----------------------------------------------------------------------------
 if __name__ == "__main__":
     results = asyncio.run(main())
     print()

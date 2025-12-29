@@ -1,3 +1,25 @@
+"""
+Price Scout Streamlit Application.
+
+This module provides a web-based user interface for comparing computer parts prices
+across multiple Australian vendors. It features single MPN queries, batch CSV processing,
+and analytics with price trend visualization.
+
+Features:
+    - Single MPN price comparison across 5 vendors
+    - CSV batch processing for multiple products
+    - Price history tracking and analytics
+    - Interactive charts and visualizations
+    - Database integration for historical data
+
+Vendors Supported:
+    - Scorptec Computers
+    - Mwave Australia
+    - PC Case Gear
+    - JW Computers
+    - Umart
+"""
+
 import time
 import asyncio
 import pandas as pd
@@ -9,6 +31,8 @@ import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
 
+
+# Vendor display names mapping
 vendor_names = {
     "scorptec": "Scorptec Computers",
     "mwave": "Mwave Australia",
@@ -17,20 +41,41 @@ vendor_names = {
     "umart": "Umart"
 }
 
-# --- DATABASE INITIALIZATION ---
+
 @st.cache_resource
 def get_db_connection():
-    """Initializes the DatabaseManager only once and caches the instance."""
+    """
+    Initialize and cache the DatabaseManager instance.
+
+    Uses Streamlit's cache_resource decorator to ensure only one database
+    connection is created and reused across the application lifecycle.
+
+    Returns:
+        DatabaseManager: Cached database manager instance for the application.
+    """
     return DatabaseManager()
 
-# Use the cached instance
+
+# Initialize cached database connection
 db = get_db_connection()
+
 
 def process_and_save_result(mpn: str, vendor_name: str, found: bool, price: float):
     """
-    Process a single vendor result and save to database if found.
-    If price changed: add new record
-    If price same: update timestamp of existing record
+    Process and save a vendor's price result to the database.
+
+    Implements smart price tracking:
+    - If price changed: adds new record
+    - If price same: updates timestamp of existing record
+
+    Args:
+        mpn: Manufacturer Part Number of the product.
+        vendor_name: Display name of the vendor (e.g., "Scorptec Computers").
+        found: Whether the product was found at this vendor.
+        price: Product price in AUD, or None if not found.
+
+    Returns:
+        None
     """
     if not found or price is None:
         return
@@ -51,7 +96,31 @@ def process_and_save_result(mpn: str, vendor_name: str, found: bool, price: floa
             # Price same, update timestamp of existing record
             db.update_price_timestamp(mpn, vendor_name, datetime.now())
 
-# --- PAGE CONFIG ---
+
+def render_custom_metric(label, value, border_color="#1E88E5"):
+    """
+    Render a custom styled metric card.
+
+    Creates a visually appealing metric display with custom styling including
+    colored top border, shadow effects, and centered text.
+
+    Args:
+        label: The metric label/description to display.
+        value: The metric value to display.
+        border_color: Hex color code for the top border (default: blue #1E88E5).
+
+    Returns:
+        None: Renders directly to Streamlit UI.
+    """
+    st.markdown(f"""
+        <div class="metric-card" style="border-top-color: {border_color};">
+            <div class="metric-label">{label}</div>
+            <div class="metric-value">{value}</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+
+# Page configuration
 st.set_page_config(page_title="Price Scout", page_icon="💻", layout="wide")
 
 # Custom CSS for high-contrast dashboard elements
@@ -72,21 +141,12 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# Helper function for custom metric cards
-def render_custom_metric(label, value, border_color="#1E88E5"):
-    st.markdown(f"""
-        <div class="metric-card" style="border-top-color: {border_color};">
-            <div class="metric-label">{label}</div>
-            <div class="metric-value">{value}</div>
-        </div>
-    """, unsafe_allow_html=True)
-
 st.title("💻 Computer Parts Price Scout")
 st.divider()
 
 tab_single, tab_batch, tab_analytics = st.tabs(["🔍 Single MPN Query", "📁 CSV Batch Processing", "📊 Analytics"])
 
-# --- TAB 1: SINGLE QUERY (Logic kept same, UI polished) ---
+# TAB 1: SINGLE MPN QUERY
 with tab_single:
     col_input, _ = st.columns([2, 2])
     with col_input:
@@ -115,11 +175,15 @@ with tab_single:
 
         st.dataframe(
             df_single,
-            column_config={"Price": st.column_config.NumberColumn(format="$%.2f"), "URL": st.column_config.LinkColumn(label="Link", display_text="Link")},
-            width='stretch', hide_index=True
+            column_config={
+                "Price": st.column_config.NumberColumn(format="$%.2f"),
+                "URL": st.column_config.LinkColumn(label="Link", display_text="Link")
+            },
+            width='stretch',
+            hide_index=True
         )
 
-# --- TAB 2: BATCH PROCESSING ---
+# TAB 2: CSV BATCH PROCESSING
 with tab_batch:
     st.markdown("### 📄 Upload & Manage Batch")
     uploaded_file = st.file_uploader("Upload CSV", type=['csv'])
@@ -130,9 +194,11 @@ with tab_batch:
                 content = uploaded_file.read().decode('utf-8')
                 df_upload = pd.read_csv(StringIO(content))
                 col_to_use = next((c for c in ['mpn'] if c in df_upload.columns), None)
-                
+
                 if col_to_use:
-                    st.session_state.mpn_list = df_upload[[col_to_use]].dropna().rename(columns={col_to_use: 'MPN To Process'})
+                    st.session_state.mpn_list = df_upload[[col_to_use]].dropna().rename(
+                        columns={col_to_use: 'MPN To Process'}
+                    )
                 else:
                     st.error("❌ CSV must contain the 'mpn' column")
                     st.stop()
@@ -140,7 +206,12 @@ with tab_batch:
                 st.error(f"Error: {e}")
 
         if 'mpn_list' in st.session_state:
-            edited_df = st.data_editor(st.session_state.mpn_list, width='stretch', num_rows="dynamic", key="mpn_editor")
+            edited_df = st.data_editor(
+                st.session_state.mpn_list,
+                width='stretch',
+                num_rows="dynamic",
+                key="mpn_editor"
+            )
             st.session_state.mpn_list = edited_df
             mpns_to_scan = edited_df['MPN To Process'].tolist()
 
@@ -169,54 +240,67 @@ with tab_batch:
                     lowest_price = min(prices) if prices else None
 
                     for res in results:
-                        mpn_result[f'{vendor_names[res.vendor_id]} Price'] = float(res.price) if res.price else None
+                        mpn_result[f'{vendor_names[res.vendor_id]} Price'] = (
+                            float(res.price) if res.price else None
+                        )
 
                     mpn_result['Best Price'] = lowest_price
-                    if lowest_price: successful_count += 1
+                    if lowest_price:
+                        successful_count += 1
                     all_results.append(mpn_result)
 
                 elapsed_time = time.time() - start_time
-                success_rate = (successful_count/len(mpns_to_scan)*100)
+                success_rate = (successful_count / len(mpns_to_scan) * 100)
 
-                # --- NEW HIGH-CONTRAST SUMMARY DASHBOARD ---
+                # Processing insights summary dashboard
                 st.divider()
                 st.subheader("📊 Processing Insights")
                 c1, c2, c3, c4 = st.columns(4)
-                with c1: render_custom_metric("Total Items", len(mpns_to_scan), "#1E88E5")
-                with c2: render_custom_metric("Items Found", successful_count, "#43A047")
-                with c3: 
+                with c1:
+                    render_custom_metric("Total Items", len(mpns_to_scan), "#1E88E5")
+                with c2:
+                    render_custom_metric("Items Found", successful_count, "#43A047")
+                with c3:
                     rate_color = "#43A047" if success_rate > 80 else "#FB8C00"
                     render_custom_metric("Success Rate", f"{success_rate:.1f}%", rate_color)
-                with c4: render_custom_metric("Time Taken", f"{elapsed_time:.1f}s", "#757575")
+                with c4:
+                    render_custom_metric("Time Taken", f"{elapsed_time:.1f}s", "#757575")
 
-                # --- IMPROVED TABLE HIGHLIGHTING ---
+                # Results table with best price highlighting
                 df_final = pd.DataFrame(all_results)
-                
+
                 # Reorder to put critical info at the front
                 main_cols = ['MPN', 'Best Price']
                 other_cols = [c for c in df_final.columns if c not in main_cols]
                 df_final = df_final[main_cols + other_cols]
 
                 def highlight_best_price(row):
+                    """Highlight the best price in each row with green background."""
                     styles = []
                     for col in row.index:
                         # Only apply to vendor price columns
                         if col.endswith('Price') and row[col] == row.get('Best Price'):
                             styles.append('background-color: #A7F3D0; color: #064E3B; font-weight: bold')
                         else:
-                            styles.append('') # default
+                            styles.append('')  # default
                     return styles
 
                 st.markdown("### 📋 Comparative Results")
                 st.dataframe(
                     df_final.style.apply(highlight_best_price, axis=1)
-                            .format(precision=2, na_rep="-", subset=[c for c in df_final.columns if 'price' in c.lower()]),
+                            .format(precision=2, na_rep="-",
+                                    subset=[c for c in df_final.columns if 'price' in c.lower()]),
                     width='stretch'
                 )
 
-                st.download_button("📥 Export Results", df_final.to_csv(index=False), "results.csv", "text/csv")
+                st.download_button(
+                    "📥 Export Results",
+                    df_final.to_csv(index=False),
+                    "results.csv",
+                    "text/csv"
+                )
 
-# --- TAB 3: ANALYTICS ---
+# TAB 3: ANALYTICS
 with tab_analytics:
     st.markdown("### 📈 Price Analytics & Trends")
 
