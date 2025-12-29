@@ -5,9 +5,9 @@ import argparse
 
 from scrapers.scorptec_scraper import ScorptecScraper
 from scrapers.mwave_scraper import MwaveScraper
-from scrapers.pc_case_gear_scraper import PCCaseGearScraper
-from scrapers.jw_computer_scraper import JWComputersScraper
-from scrapers.umart_scraper import UmartScraper
+from scrapers.pccg.pc_case_gear_scraper_http import PCCaseGearScraper
+from scrapers.umart.umart_scraper_http import UmartScraper
+from scrapers.jwc.jw_computer_scraper_http import JWComputersScraper
 from scraper import read_mpns_from_csv, batch_scrape_mpns, write_results_to_csv
 
 # -----------------------------------------------------------------------------
@@ -101,6 +101,7 @@ async def main():
 # -----------------------------------------------------------------------------
 if __name__ == "__main__":
     results = asyncio.run(main())
+    print()
 
     # Print results based on mode
     if isinstance(results, list):

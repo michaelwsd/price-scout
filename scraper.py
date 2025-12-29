@@ -6,9 +6,9 @@ from typing import List
 
 from scrapers.scorptec_scraper import ScorptecScraper
 from scrapers.mwave_scraper import MwaveScraper
-from scrapers.pc_case_gear_scraper import PCCaseGearScraper
-from scrapers.jw_computer_scraper import JWComputersScraper
-from scrapers.umart_scraper import UmartScraper
+from scrapers.pccg.pc_case_gear_scraper_http import PCCaseGearScraper
+from scrapers.jwc.jw_computer_scraper_http import JWComputersScraper
+from scrapers.umart.umart_scraper_http import UmartScraper
 
 # -----------------------------------------------------------------------------
 # Logging configuration
