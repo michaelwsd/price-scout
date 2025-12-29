@@ -101,17 +101,7 @@ price-scout/
 
 3. **Install dependencies**:
    ```bash
-   pip install streamlit pandas plotly playwright cloudscraper beautifulsoup4 lxml pydantic requests
-   ```
-
-4. **Install Playwright browsers**:
-   ```bash
-   playwright install chromium
-   ```
-
-   If you encounter permission issues or prefer a lighter installation:
-   ```bash
-   playwright install chromium --with-deps
+   pip install -r requirements.txt
    ```
 
 ## Usage
