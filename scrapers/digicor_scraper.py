@@ -115,6 +115,8 @@ class DigicorScraper(BaseScraper):
         url = image['href']
         in_stock = image.select_one("span").get_text().strip() == "In Stock"
 
+        logger.debug("Raw price text extracted: %s", price_text)
+
         return PriceResult(
             vendor_id=self.vendor_id,
             url=url,

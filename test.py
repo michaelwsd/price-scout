@@ -88,6 +88,9 @@ def test_single_mwave(mpn):
         print("Price: Not found")
         return
     
+    in_stock = soup.select_one("ul.stockAndDelivery").select_one("span").get_text() == "Available at Supplier"
+    print(in_stock)
+    
     print(f"Link: {url}")
 
 async def test_single_pccg(mpn):
@@ -233,9 +236,9 @@ if __name__ == "__main__":
     print(f"🔍 Price Scout Results for MPN: {mpn}")
     print("="*50)
 
-    # Digicor
-    print("\n--- Digicor ---")
-    test_single_digicor(mpn) 
+    # # Digicor
+    # print("\n--- Digicor ---")
+    # test_single_digicor(mpn) 
       
     # # Scorptec
     # print("\n--- Scorptec ---")
@@ -253,9 +256,9 @@ if __name__ == "__main__":
     # print("\n--- JW Computers ---")
     # test_jwc_http(mpn)
     
-    # # Umart
-    # print("\n--- Umart ---")
-    # test_umart_http(mpn)
+    # Umart
+    print("\n--- Umart ---")
+    test_umart_http(mpn)
 
     print("\n" + "="*50)
     print("✅ All scrapers completed")

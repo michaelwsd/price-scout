@@ -53,5 +53,5 @@ class PriceResult(BaseModel):
     price: Optional[Decimal] = None
     currency: Optional[str] = None
     in_stock: Optional[bool] = None
-    condition: Optional[str] = "Unknown"
+    condition: Optional[str] = "New"
     found: bool 

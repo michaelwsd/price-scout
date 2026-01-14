@@ -25,6 +25,11 @@ from scrapers.jwc.jw_computer_scraper import JWComputersScraper
 from scrapers.umart.umart_scraper import UmartScraper
 from scrapers.digicor_scraper import DigicorScraper
 
+from scrapers.umart.umart_scraper_playwright import UmartScraper as UmartPlaywrightScraper
+from scrapers.jwc.jw_computer_scraper_playwright import JWComputersScraper as JWCPlaywrightScraper
+from scrapers.pccg.pc_case_gear_scraper_playwright import PCCaseGearScraper as PCCaseGearPlaywrightScraper 
+from scrapers.scorptec.scorptec_scraper_cloud import ScorptecScraper as ScorptecCloudScraper 
+
 # Logging configuration
 logging.basicConfig(
     level=logging.INFO,
@@ -34,7 +39,7 @@ logging.basicConfig(
 logger = logging.getLogger("price-scout")
 
 
-async def scrape_mpn_single(mpn):
+async def scrape_mpn_single(mpn, detailed=False):
     """
     Scrape price data for a single MPN from all supported vendors concurrently.
 
@@ -58,14 +63,24 @@ async def scrape_mpn_single(mpn):
 
     logger.info("Starting price scout for MPN=%s", mpn)
 
-    scrapers = [
-        ("Digicor", DigicorScraper()),
-        ("Scorptec", ScorptecScraper()),
-        ("Mwave", MwaveScraper()),
-        ("PC Case Gear", PCCaseGearScraper()),
-        ("JW Computers", JWComputersScraper()),
-        ("Umart", UmartScraper())
-    ]
+    if not detailed:
+        scrapers = [
+            ("Digicor", DigicorScraper()),
+            ("Scorptec", ScorptecScraper()),
+            ("Mwave", MwaveScraper()),
+            ("PC Case Gear", PCCaseGearScraper()),
+            ("JW Computers", JWComputersScraper()),
+            ("Umart", UmartScraper())
+        ]
+    else:
+        scrapers = [
+            ("Digicor", DigicorScraper()),
+            ("Scorptec", ScorptecCloudScraper()),
+            ("Mwave", MwaveScraper()),
+            ("PC Case Gear", PCCaseGearPlaywrightScraper()),
+            ("JW Computers", JWCPlaywrightScraper()),
+            ("Umart", UmartPlaywrightScraper())
+        ]
 
     tasks = [scraper.scrape(mpn) for _, scraper in scrapers]  # coroutine objects
     results = await asyncio.gather(*tasks, return_exceptions=True)

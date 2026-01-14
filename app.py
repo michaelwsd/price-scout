@@ -150,13 +150,24 @@ tab_single, tab_batch, tab_analytics = st.tabs(["🔍 Single MPN Query", "📁 C
 
 # TAB 1: SINGLE MPN QUERY
 with tab_single:
-    col_input, _ = st.columns([2, 2])
+    col_input, col_mode = st.columns([2, 2])
     with col_input:
         mpn_input = st.text_input("Enter MPN:", placeholder="e.g. 12400F")
+    with col_mode:
+        scrape_mode = st.radio(
+            "Scrape Mode:",
+            options=["Fast", "More Info"],
+            horizontal=True,
+            help="Fast: HTTP + Playwright fallback (no stock/condition). More Info: Playwright only (slower, includes stock/condition)."
+        )
 
     if st.button("Fetch Prices", type="primary") and mpn_input:
-        with st.spinner(f"Searching {mpn_input}..."):
-            results = asyncio.run(scrape_mpn_single(mpn_input.strip()))
+        if scrape_mode == "Fast":
+            with st.spinner(f"Searching {mpn_input} (Fast mode)..."):
+                results = asyncio.run(scrape_mpn_single(mpn_input.strip(), False))
+        else:
+            with st.spinner(f"Searching {mpn_input} (More Info mode - this may take longer)..."):
+                results = asyncio.run(scrape_mpn_single(mpn_input.strip(), True))
 
         # Process and save results to database
         for res in results:
@@ -168,24 +179,43 @@ with tab_single:
                 price=float(res.price) if res.price else None
             )
 
-        df_single = pd.DataFrame([{
-            "Vendor": vendor_names.get(res.vendor_id, res.vendor_id),
-            "Price": float(res.price) if res.price else None,
-            "Found": "✅" if res.found else "❌",
-            "In Stock": "✅" if res.in_stock else "❌",
-            "Condition": res.condition,
-            "URL": str(res.url) if res.url else None
-        } for res in results])
+        # Build dataframe based on mode
+        if scrape_mode == "Fast":
+            df_single = pd.DataFrame([{
+                "Vendor": vendor_names.get(res.vendor_id, res.vendor_id),
+                "Price": float(res.price) if res.price else None,
+                "Found": "✅" if res.found else "❌",
+                "URL": str(res.url) if res.url else None
+            } for res in results])
 
-        st.dataframe(
-            df_single,
-            column_config={
-                "Price": st.column_config.NumberColumn(format="$%.2f"),
-                "URL": st.column_config.LinkColumn(label="Link", display_text="Link")
-            },
-            width='stretch',
-            hide_index=True
-        )
+            st.dataframe(
+                df_single,
+                column_config={
+                    "Price": st.column_config.NumberColumn(format="$%.2f"),
+                    "URL": st.column_config.LinkColumn(label="Link", display_text="Link")
+                },
+                width='stretch',
+                hide_index=True
+            )
+        else:
+            df_single = pd.DataFrame([{
+                "Vendor": vendor_names.get(res.vendor_id, res.vendor_id),
+                "Price": float(res.price) if res.price else None,
+                "Found": "✅" if res.found else "❌",
+                "In Stock": "✅" if res.in_stock else "❌",
+                "Condition": res.condition,
+                "URL": str(res.url) if res.url else None
+            } for res in results])
+
+            st.dataframe(
+                df_single,
+                column_config={
+                    "Price": st.column_config.NumberColumn(format="$%.2f"),
+                    "URL": st.column_config.LinkColumn(label="Link", display_text="Link")
+                },
+                width='stretch',
+                hide_index=True
+            )
 
 # TAB 2: CSV BATCH PROCESSING
 with tab_batch:
