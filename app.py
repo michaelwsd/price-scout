@@ -227,14 +227,14 @@ with tab_batch:
             try:
                 content = uploaded_file.read().decode('utf-8')
                 df_upload = pd.read_csv(StringIO(content))
-                col_to_use = next((c for c in ['mpn'] if c in df_upload.columns), None)
+                col_to_use = next((c for c in ['mpn', 'MPN'] if c in df_upload.columns), None)
 
                 if col_to_use:
                     st.session_state.mpn_list = df_upload[[col_to_use]].dropna().rename(
                         columns={col_to_use: 'MPN To Process'}
                     )
                 else:
-                    st.error("❌ CSV must contain the 'mpn' column")
+                    st.error("❌ CSV must contain the 'mpn' or 'MPN' column")
                     st.stop()
             except Exception as e:
                 st.error(f"Error: {e}")
