@@ -1,1 +1,0 @@
-"""eBay Australia scraper package."""
