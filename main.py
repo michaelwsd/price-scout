@@ -24,6 +24,7 @@ import logging
 import asyncio
 import argparse
 
+from scrapers.ebay.ebay_scraper import EbayScraper
 from scrapers.scorptec.scorptec_scraper_http import ScorptecScraper
 from scrapers.mwave_scraper import MwaveScraper
 from scrapers.pccg.pc_case_gear_scraper_http import PCCaseGearScraper
@@ -86,6 +87,7 @@ async def main():
         ("PC Case Gear", PCCaseGearScraper()),
         ("JW Computers", JWComputersScraper()),
         ("Umart", UmartScraper()),
+        ("Ebay", EbayScraper()),
     ]
 
     if args.mpn:

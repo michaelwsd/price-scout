@@ -24,11 +24,13 @@ from scrapers.pccg.pc_case_gear_scraper import PCCaseGearScraper
 from scrapers.jwc.jw_computer_scraper import JWComputersScraper
 from scrapers.umart.umart_scraper import UmartScraper
 from scrapers.digicor_scraper import DigicorScraper
+from scrapers.ebay.ebay_scraper import EbayScraper
 
 from scrapers.umart.umart_scraper_playwright import UmartScraper as UmartPlaywrightScraper
 from scrapers.jwc.jw_computer_scraper_playwright import JWComputersScraper as JWCPlaywrightScraper
-from scrapers.pccg.pc_case_gear_scraper_playwright import PCCaseGearScraper as PCCaseGearPlaywrightScraper 
-from scrapers.scorptec.scorptec_scraper_cloud import ScorptecScraper as ScorptecCloudScraper 
+from scrapers.pccg.pc_case_gear_scraper_playwright import PCCaseGearScraper as PCCaseGearPlaywrightScraper
+from scrapers.scorptec.scorptec_scraper_cloud import ScorptecScraper as ScorptecCloudScraper
+from scrapers.ebay.ebay_scraper_playwright import EbayScraper as EbayPlaywrightScraper 
 
 # Logging configuration
 logging.basicConfig(
@@ -70,7 +72,8 @@ async def scrape_mpn_single(mpn, detailed=False):
             ("Mwave", MwaveScraper()),
             ("PC Case Gear", PCCaseGearScraper()),
             ("JW Computers", JWComputersScraper()),
-            ("Umart", UmartScraper())
+            ("Umart", UmartScraper()),
+            ("eBay AU", EbayScraper())
         ]
     else:
         scrapers = [
@@ -79,7 +82,8 @@ async def scrape_mpn_single(mpn, detailed=False):
             ("Mwave", MwaveScraper()),
             ("PC Case Gear", PCCaseGearPlaywrightScraper()),
             ("JW Computers", JWCPlaywrightScraper()),
-            ("Umart", UmartPlaywrightScraper())
+            ("Umart", UmartPlaywrightScraper()),
+            ("eBay AU", EbayPlaywrightScraper())
         ]
 
     tasks = [scraper.scrape(mpn) for _, scraper in scrapers]  # coroutine objects
@@ -256,7 +260,8 @@ def write_results_to_csv(results, output_path: str):
         'mpn', 'lowest_price', 'lowest_price_vendor', 'lowest_price_url',
         'scorptec_price', 'scorptec_url', 'mwave_price', 'mwave_url',
         'pccasegear_price', 'pccasegear_url', 'jwcomputers_price', 'jwcomputers_url',
-        'umart_price', 'umart_url, digicor_price, digicor_url'
+        'umart_price', 'umart_url', 'digicor_price', 'digicor_url',
+        'ebay_au_price', 'ebay_au_url'
     ]
 
     with open(output_path, 'w', newline='', encoding='utf-8') as f:
@@ -277,7 +282,8 @@ def write_results_to_csv(results, output_path: str):
                 'PC Case Gear': 'pccasegear',
                 'JW Computers': 'jwcomputers',
                 'Umart': 'umart',
-                "Digicor": 'digicor'
+                'Digicor': 'digicor',
+                'eBay AU': 'ebay_au'
             }
 
             for vendor_name, data in result_dict.items():

@@ -19,6 +19,7 @@ Vendors Supported:
     - JW Computers
     - Umart
     - Digicor
+    - eBay Australia
 """
 
 import time
@@ -40,7 +41,8 @@ vendor_names = {
     "mwave": "Mwave Australia",
     "pc_case_gear": "PC Case Gear",
     "jw_computers": "JW Computers",
-    "umart": "Umart"
+    "umart": "Umart",
+    "ebay_au": "eBay Australia"
 }
 
 
