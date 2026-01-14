@@ -98,6 +98,9 @@ class UmartScraper(BaseScraper):
             else:
                 price_text = price_text.get_text(strip=True)
 
+            # Extract stock status
+            in_stock = self._extract_stock_status(soup)
+
             await browser.close()
 
         return PriceResult(
@@ -106,5 +109,60 @@ class UmartScraper(BaseScraper):
             mpn=mpn,
             price=float(price_text),
             currency=self.currency,
+            in_stock=in_stock,
             found=True
         )
+
+    def _extract_stock_status(self, soup: BeautifulSoup) -> bool:
+        """
+        Extract stock availability status from the product page.
+
+        Umart stock statuses:
+        - "In Stock" = in stock
+        - "Pre Order", "At Other Stores" = available but not immediate
+        - "Out of Stock", "Discontinued" = not available
+
+        Args:
+            soup: BeautifulSoup object of the product page.
+
+        Returns:
+            True if in stock, False otherwise.
+        """
+        # Try multiple possible selectors for stock status
+        stock_selectors = [
+            "div.goods_stock",
+            "span.stock-status",
+            "div.stock-status",
+            "div.availability",
+            "span.availability",
+            "div.product-stock",
+            "div.goods-stock-info",
+        ]
+
+        for selector in stock_selectors:
+            stock_elem = soup.select_one(selector)
+            if stock_elem:
+                stock_text = stock_elem.get_text(strip=True).lower()
+                logger.debug("Umart stock text: %s", stock_text)
+
+                # Check for in-stock indicators
+                if "in stock" in stock_text:
+                    return True
+                # Check for out-of-stock indicators
+                if "out of stock" in stock_text or "discontinued" in stock_text:
+                    return False
+                # "Pre Order", "At Other Stores" = not immediately in stock
+                if "pre order" in stock_text or "preorder" in stock_text:
+                    return False
+                if "other store" in stock_text:
+                    return True  # Available at other stores = still available
+
+        # Check for "Add to Cart" button as fallback
+        add_to_cart = soup.select_one("button.add-to-cart, a.add-to-cart, button.btn-addcart, a.btn-addcart")
+        if add_to_cart:
+            if add_to_cart.get("disabled") or "disabled" in add_to_cart.get("class", []):
+                return False
+            return True
+
+        # Default to True if product exists with price
+        return True

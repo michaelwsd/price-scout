@@ -113,7 +113,21 @@ class MwaveScraper(BaseScraper):
         price_text = price_div.get_text(strip=True).replace(",", "")[1:]
         logger.debug("Raw price text extracted: %s", price_text)
 
-        in_stock = soup.select_one("ul.stockAndDelivery").select_one("span").get_text() == "Available at Supplier"
+        # Extract stock status
+        # Default to True if product exists with price (can likely be ordered)
+        in_stock = True
+        stock_elem = soup.select_one("ul.stockAndDelivery")
+        if stock_elem:
+            stock_span = stock_elem.select_one("span")
+            if stock_span:
+                stock_text = stock_span.get_text(strip=True).lower()
+                logger.debug("Mwave stock text: %s", stock_text)
+                # "In Stock", "In Stock Fast Dispatch", "Available at Supplier" = in stock
+                # "Preorder", "Notify Me", "Out of Stock" = not in stock
+                if "in stock" in stock_text or "available" in stock_text:
+                    in_stock = True
+                elif "preorder" in stock_text or "notify" in stock_text or "out of stock" in stock_text:
+                    in_stock = False
 
         return PriceResult(
             vendor_id=self.vendor_id,

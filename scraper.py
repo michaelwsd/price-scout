@@ -258,10 +258,13 @@ def write_results_to_csv(results, output_path: str):
 
     fieldnames = [
         'mpn', 'lowest_price', 'lowest_price_vendor', 'lowest_price_url',
-        'scorptec_price', 'scorptec_url', 'mwave_price', 'mwave_url',
-        'pccasegear_price', 'pccasegear_url', 'jwcomputers_price', 'jwcomputers_url',
-        'umart_price', 'umart_url', 'digicor_price', 'digicor_url',
-        'ebay_au_price', 'ebay_au_url'
+        'scorptec_price', 'scorptec_stock', 'scorptec_condition', 'scorptec_url',
+        'mwave_price', 'mwave_stock', 'mwave_condition', 'mwave_url',
+        'pccasegear_price', 'pccasegear_stock', 'pccasegear_condition', 'pccasegear_url',
+        'jwcomputers_price', 'jwcomputers_stock', 'jwcomputers_condition', 'jwcomputers_url',
+        'umart_price', 'umart_stock', 'umart_condition', 'umart_url',
+        'digicor_price', 'digicor_stock', 'digicor_condition', 'digicor_url',
+        'ebay_au_price', 'ebay_au_stock', 'ebay_au_condition', 'ebay_au_url'
     ]
 
     with open(output_path, 'w', newline='', encoding='utf-8') as f:
@@ -295,9 +298,13 @@ def write_results_to_csv(results, output_path: str):
                         lowest_url = str(data.url)
                     row[f'{vendor_key}_price'] = float(data.price)
                     row[f'{vendor_key}_url'] = str(data.url)
+                    row[f'{vendor_key}_stock'] = "Yes" if data.in_stock else "No" if data.in_stock is False else ""
+                    row[f'{vendor_key}_condition'] = data.condition if data.condition else ""
                 else:
                     row[f'{vendor_key}_price'] = None
                     row[f'{vendor_key}_url'] = None
+                    row[f'{vendor_key}_stock'] = None
+                    row[f'{vendor_key}_condition'] = None
 
             row['lowest_price'] = float(lowest_price) if lowest_price else None
             row['lowest_price_vendor'] = lowest_vendor
