@@ -97,7 +97,7 @@ async def scrape_mpn_single(mpn, detailed=False):
     elapsed = time.perf_counter() - start
     logger.info("All scrapers completed in %.2f seconds", elapsed)
 
-    return results
+    return [r for r in results if not isinstance(r, Exception)]
 
 
 def read_mpns_from_csv(csv_path: str) -> List[str]:
@@ -128,10 +128,10 @@ def read_mpns_from_csv(csv_path: str) -> List[str]:
         mpn_column = None
         if 'mpn' in reader.fieldnames:
             mpn_column = 'mpn'
-        elif 'name' in reader.fieldnames:
-            mpn_column = 'name'
+        elif 'MPN' in reader.fieldnames:
+            mpn_column = 'MPN'
         else:
-            raise ValueError("CSV file must contain 'mpn' or 'name' column")
+            raise ValueError("CSV file must contain 'mpn' or 'MPN' column")
 
         for row in reader:
             if row.get(mpn_column, '').strip():
