@@ -105,19 +105,9 @@ class ScorptecScraper(BaseScraper):
                 price_tag = first_product.select_one("div.price.sli_real_price")
                 if not price_tag:
                     return self.not_found
-
+                
                 price_text = price_tag.get_text(strip=True)
                 price = float(re.sub(r'[^\d.]', '', price_text))
-
-                # 6. Extract stock status from search results (if available)
-                in_stock = None  # Default unknown from search API
-                stock_elem = first_product.select_one("div.stock, span.stock, div.availability")
-                if stock_elem:
-                    stock_text = stock_elem.get_text(strip=True).lower()
-                    if "in stock" in stock_text or "available" in stock_text:
-                        in_stock = True
-                    elif "sold out" in stock_text or "out of stock" in stock_text:
-                        in_stock = False
 
                 return PriceResult(
                     vendor_id=self.vendor_id,
@@ -125,7 +115,6 @@ class ScorptecScraper(BaseScraper):
                     price=price,
                     currency=self.currency,
                     url=final_url,
-                    in_stock=in_stock,
                     found=True
                 )
 

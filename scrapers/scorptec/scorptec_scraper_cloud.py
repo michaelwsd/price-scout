@@ -116,70 +116,11 @@ class ScorptecScraper(BaseScraper):
         price_text = price_div.get_text(strip=True)
         logger.debug("Raw price text extracted: %s", price_text)
 
-        # Extract stock status
-        in_stock = self._extract_stock_status(soup)
-
         return PriceResult(
             vendor_id=self.vendor_id,
             url=url,
             mpn=mpn,
             price=float(price_text),
             currency=self.currency,
-            in_stock=in_stock,
             found=True
         )
-
-    def _extract_stock_status(self, soup: BeautifulSoup) -> bool:
-        """
-        Extract stock availability status from the product page.
-
-        Scorptec stock statuses:
-        - "In Stock" or number = in stock
-        - "Available Soon", "Awaiting Stock", "ETA" = not immediately available
-        - "Sold Out" = out of stock
-
-        Args:
-            soup: BeautifulSoup object of the product page.
-
-        Returns:
-            True if in stock, False otherwise.
-        """
-        # Try multiple possible selectors for stock status
-        stock_selectors = [
-            "div.product-page-stock",
-            "div.stock-status",
-            "span.stock-status",
-            "div.availability",
-            "div.product-availability",
-            "div.product-page-availability",
-        ]
-
-        for selector in stock_selectors:
-            stock_elem = soup.select_one(selector)
-            if stock_elem:
-                stock_text = stock_elem.get_text(strip=True).lower()
-                logger.debug("Scorptec stock text: %s", stock_text)
-
-                # Check for in-stock indicators
-                if "in stock" in stock_text:
-                    return True
-                # Check for numeric stock (e.g., "5 in stock", "5 available")
-                if any(char.isdigit() for char in stock_text) and ("stock" in stock_text or "available" in stock_text):
-                    return True
-                # Check for out-of-stock indicators
-                if "sold out" in stock_text or "out of stock" in stock_text:
-                    return False
-                # "Available Soon", "Awaiting Stock", "ETA" = not immediately in stock
-                if "awaiting" in stock_text or "available soon" in stock_text or "eta" in stock_text:
-                    return False
-
-        # Check for "Add to Cart" button as fallback indicator
-        add_to_cart = soup.select_one("button.add-to-cart, a.add-to-cart, button[data-action='add-to-cart']")
-        if add_to_cart:
-            # Check if button is disabled
-            if add_to_cart.get("disabled") or "disabled" in add_to_cart.get("class", []):
-                return False
-            return True
-
-        # Default to True if we found a price (product exists and can likely be ordered)
-        return True

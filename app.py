@@ -276,15 +276,8 @@ with tab_batch:
                     lowest_price = min(prices) if prices else None
 
                     for res in results:
-                        vendor_name = vendor_names.get(res.vendor_id, res.vendor_id)
-                        mpn_result[f'{vendor_name} Price'] = (
+                        mpn_result[f'{vendor_names[res.vendor_id]} Price'] = (
                             float(res.price) if res.price else None
-                        )
-                        mpn_result[f'{vendor_name} Stock'] = (
-                            "✅" if res.in_stock else "❌" if res.in_stock is False else "-"
-                        )
-                        mpn_result[f'{vendor_name} Condition'] = (
-                            res.condition if res.condition else "-"
                         )
 
                     mpn_result['Best Price'] = lowest_price
