@@ -172,6 +172,8 @@ with tab_single:
             "Vendor": vendor_names.get(res.vendor_id, res.vendor_id),
             "Price": float(res.price) if res.price else None,
             "Found": "✅" if res.found else "❌",
+            "In Stock": "✅" if res.in_stock else "❌",
+            "Condition": res.condition,
             "URL": str(res.url) if res.url else None
         } for res in results])
 
