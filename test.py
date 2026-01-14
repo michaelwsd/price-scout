@@ -45,6 +45,8 @@ def test_single_scorptec(mpn):
     else:
         print("Price: Not found")
         return
+    
+    in_stock = soup.select_one("div.product-page-status.status-box").select_one("span.status-text").get_text() == "in stock"
 
     print(f"Link: {url}")
 
@@ -123,7 +125,7 @@ async def test_single_pccg(mpn):
             print("MPN: Not found")
             return 
 
-        # # get price
+        # get price
         price = product.select_one("div.price")
         if not price:
             print("Price: Not found")
@@ -131,8 +133,9 @@ async def test_single_pccg(mpn):
 
         print(f"Price: {float(price.get_text(strip=True)[1:])}")
 
+        in_stock = product.select_one("div.stock-label").select_one("span.tool-tip-wrapper").get_text() == "In stock"
+
         link = "https://www.pccasegear.com" + product.select_one("a.product-title")["href"]
-        print(f"Link: {link}")
 
         await browser.close()
 
@@ -177,6 +180,8 @@ async def test_single_jwc(mpn):
             print("Price: Not found")
             return 
         
+        in_stock = soup.select_one("span.dispatch-label.available").select("span")[-2].get_text() == "Available"
+        
         print(f"Price: {float(price.get_text(strip=True).replace(',', '')[1:])}")
         print(f"Link: {link}")
 
@@ -205,6 +210,8 @@ async def test_single_umart(mpn):
         if not product:
             print("Product: Not found")
             return 
+        
+        in_stock = product.select_one("span.goods_stock").select_one("span").get_text() == "In Stock"
         
         # get price from link
         link = "https://www.umart.com.au/" + product.select_one("a")["href"]
@@ -242,7 +249,7 @@ if __name__ == "__main__":
       
     # # Scorptec
     # print("\n--- Scorptec ---")
-    # test_scorptec_http(mpn)
+    # test_single_scorptec(mpn)
     
     # # Mwave
     # print("\n--- Mwave ---")
@@ -250,15 +257,15 @@ if __name__ == "__main__":
     
     # # PCCG (async)
     # print("\n--- PC Case Gear ---")
-    # test_pccg_http(mpn)
+    # asyncio.run(test_single_pccg(mpn))
 
     # # JW Computers
     # print("\n--- JW Computers ---")
-    # test_jwc_http(mpn)
+    # asyncio.run(test_single_jwc(mpn))
     
     # Umart
     print("\n--- Umart ---")
-    test_umart_http(mpn)
+    asyncio.run(test_single_umart(mpn))
 
     print("\n" + "="*50)
     print("✅ All scrapers completed")

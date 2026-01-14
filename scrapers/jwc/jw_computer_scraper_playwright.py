@@ -70,7 +70,7 @@ class JWComputersScraper(BaseScraper):
                 await page.goto(
                     link,
                     wait_until="networkidle",  # wait for JS requests
-                    timeout=60000              # 60 seconds
+                    timeout=30000              # 30 seconds
                 )
             except Exception as e:
                 logger.warning("Page failed to load for MPN=%s at %s: %s", mpn, url, e)
@@ -99,6 +99,8 @@ class JWComputersScraper(BaseScraper):
             else:
                 price_text = price_text.get_text(strip=True).replace(",", "")[1:]
 
+            in_stock = soup.select_one("span.dispatch-label.available").select("span")[-2].get_text() == "Available"
+
             await browser.close()
 
         return PriceResult(
@@ -107,5 +109,6 @@ class JWComputersScraper(BaseScraper):
             mpn=mpn,
             price=float(price_text),
             currency=self.currency,
+            in_stock=in_stock,
             found=True
         )

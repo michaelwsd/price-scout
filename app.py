@@ -203,7 +203,7 @@ with tab_single:
                 "Price": float(res.price) if res.price else None,
                 "Found": "✅" if res.found else "❌",
                 "In Stock": "✅" if res.in_stock else "❌",
-                "Condition": res.condition,
+                "Condition": res.condition if res.found else None,
                 "URL": str(res.url) if res.url else None
             } for res in results])
 

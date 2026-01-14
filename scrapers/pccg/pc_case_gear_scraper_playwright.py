@@ -34,7 +34,7 @@ class PCCaseGearScraper(BaseScraper):
                 await page.goto(
                     url,
                     wait_until="networkidle",  # wait for JS requests
-                    timeout=60000              # 60 seconds
+                    timeout=30000              # 30 seconds
                 )
             except Exception as e:
                 logger.warning("Page failed to load for MPN=%s at %s: %s", mpn, url, e)
@@ -61,6 +61,9 @@ class PCCaseGearScraper(BaseScraper):
                     url,
                 )
                 return self.not_found
+            
+            # get stock
+            in_stock = product.select_one("div.stock-label").select_one("span.tool-tip-wrapper").get_text() == "In stock"
 
             # get link 
             link = "https://www.pccasegear.com" + product.select_one("a.product-title")["href"]
@@ -95,5 +98,6 @@ class PCCaseGearScraper(BaseScraper):
             mpn=mpn,
             price=float(price_text),
             currency=self.currency,
+            in_stock=in_stock,
             found=True
         )

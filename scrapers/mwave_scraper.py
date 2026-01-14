@@ -113,7 +113,8 @@ class MwaveScraper(BaseScraper):
         price_text = price_div.get_text(strip=True).replace(",", "")[1:]
         logger.debug("Raw price text extracted: %s", price_text)
 
-        in_stock = soup.select_one("ul.stockAndDelivery").select_one("span").get_text() == "Available at Supplier"
+        stock_text = soup.select_one("ul.stockAndDelivery").select_one("span").get_text()
+        in_stock = "Available" in stock_text or "In Stock" in stock_text
 
         return PriceResult(
             vendor_id=self.vendor_id,

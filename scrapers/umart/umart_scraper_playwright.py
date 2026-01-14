@@ -34,7 +34,7 @@ class UmartScraper(BaseScraper):
                 await page.goto(
                     url,
                     wait_until="networkidle",  # wait for JS requests
-                    timeout=60000              # 60 seconds
+                    timeout=30000              # 30 seconds
                 )
             except Exception as e:
                 logger.warning("Page failed to load for MPN=%s at %s: %s", mpn, url, e)
@@ -69,7 +69,7 @@ class UmartScraper(BaseScraper):
                 await page.goto(
                     link,
                     wait_until="networkidle",  # wait for JS requests
-                    timeout=60000              # 60 seconds
+                    timeout=30000              # 30 seconds
                 )
             except Exception as e:
                 logger.warning("Page failed to load for MPN=%s at %s: %s", mpn, url, e)
@@ -98,6 +98,8 @@ class UmartScraper(BaseScraper):
             else:
                 price_text = price_text.get_text(strip=True)
 
+            in_stock = product.select_one("span.goods_stock").select_one("span").get_text() == "In Stock"
+
             await browser.close()
 
         return PriceResult(
@@ -106,5 +108,6 @@ class UmartScraper(BaseScraper):
             mpn=mpn,
             price=float(price_text),
             currency=self.currency,
+            in_stock=in_stock,
             found=True
         )

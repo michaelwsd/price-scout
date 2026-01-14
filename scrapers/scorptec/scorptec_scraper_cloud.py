@@ -116,11 +116,14 @@ class ScorptecScraper(BaseScraper):
         price_text = price_div.get_text(strip=True)
         logger.debug("Raw price text extracted: %s", price_text)
 
+        in_stock = soup.select_one("div.product-page-status.status-box").select_one("span.status-text").get_text() == "in stock"
+
         return PriceResult(
             vendor_id=self.vendor_id,
             url=url,
             mpn=mpn,
             price=float(price_text),
             currency=self.currency,
+            in_stock=in_stock,
             found=True
         )
