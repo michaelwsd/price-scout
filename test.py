@@ -48,6 +48,28 @@ def test_single_scorptec(mpn):
 
     print(f"Link: {url}")
 
+def test_single_digicor(mpn):
+    url = f"https://www.digicor.com.au/catalogsearch/result/?q={mpn}"
+    r = scraper.get(url)
+    soup = BeautifulSoup(r.text, 'lxml')
+
+    product_element = soup.select_one("form.product-item")
+
+    if not product_element:
+        print("MPN: Not found")
+
+    model_element = product_element.select_one("li").get_text().split()[-1]
+    price_element = product_element.select_one("span.price").get_text()[2:]
+    image = product_element.select_one("a.product.photo")
+    link = image['href']
+    in_stock = image.select_one("span").get_text().strip() == "In Stock"
+    print(model_element)
+    print(price_element)
+    print(in_stock)
+    print(link)
+
+    print(f"Link: {url}")
+
 def test_single_mwave(mpn):
     url = f"https://www.mwave.com.au/searchresult?button=go&w={mpn}&cnt=1"
     r = scraper.get(url)
@@ -210,26 +232,30 @@ if __name__ == "__main__":
     print("="*50)
     print(f"🔍 Price Scout Results for MPN: {mpn}")
     print("="*50)
-    
-    # Scorptec
-    print("\n--- Scorptec ---")
-    test_scorptec_http(mpn)
-    
-    # Mwave
-    print("\n--- Mwave ---")
-    test_single_mwave(mpn)
-    
-    # PCCG (async)
-    print("\n--- PC Case Gear ---")
-    test_pccg_http(mpn)
 
-    # JW Computers
-    print("\n--- JW Computers ---")
-    test_jwc_http(mpn)
+    # Digicor
+    print("\n--- Digicor ---")
+    test_single_digicor(mpn) 
+      
+    # # Scorptec
+    # print("\n--- Scorptec ---")
+    # test_scorptec_http(mpn)
     
-    # Umart
-    print("\n--- Umart ---")
-    test_umart_http(mpn)
+    # # Mwave
+    # print("\n--- Mwave ---")
+    # test_single_mwave(mpn)
+    
+    # # PCCG (async)
+    # print("\n--- PC Case Gear ---")
+    # test_pccg_http(mpn)
+
+    # # JW Computers
+    # print("\n--- JW Computers ---")
+    # test_jwc_http(mpn)
+    
+    # # Umart
+    # print("\n--- Umart ---")
+    # test_umart_http(mpn)
 
     print("\n" + "="*50)
     print("✅ All scrapers completed")

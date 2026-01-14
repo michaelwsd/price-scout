@@ -18,6 +18,7 @@ Vendors Supported:
     - PC Case Gear
     - JW Computers
     - Umart
+    - Digicor
 """
 
 import time
@@ -38,7 +39,8 @@ vendor_names = {
     "mwave": "Mwave Australia",
     "pc_case_gear": "PC Case Gear",
     "jw_computers": "JW Computers",
-    "umart": "Umart"
+    "umart": "Umart",
+    "digicor": "Digicor"
 }
 
 

@@ -52,4 +52,5 @@ class PriceResult(BaseModel):
     mpn: Optional[str] = None
     price: Optional[Decimal] = None
     currency: Optional[str] = None
+    in_stock: Optional[bool] = None
     found: bool 

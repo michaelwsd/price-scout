@@ -18,12 +18,12 @@ import logging
 import asyncio
 from typing import List
 
-from scrapers.scorptec.scorptec_scraper_fallback import ScorptecScraper
+from scrapers.scorptec.scorptec_scraper import ScorptecScraper
 from scrapers.mwave_scraper import MwaveScraper
 from scrapers.pccg.pc_case_gear_scraper import PCCaseGearScraper
 from scrapers.jwc.jw_computer_scraper import JWComputersScraper
 from scrapers.umart.umart_scraper import UmartScraper
-
+from scrapers.digicor_scraper import DigicorScraper
 
 # Logging configuration
 logging.basicConfig(
@@ -64,6 +64,7 @@ async def scrape_mpn_single(mpn):
         ("PC Case Gear", PCCaseGearScraper()),
         ("JW Computers", JWComputersScraper()),
         ("Umart", UmartScraper()),
+        ("Digicor", DigicorScraper())
     ]
 
     tasks = [scraper.scrape(mpn) for _, scraper in scrapers]  # coroutine objects
@@ -240,7 +241,7 @@ def write_results_to_csv(results, output_path: str):
         'mpn', 'lowest_price', 'lowest_price_vendor', 'lowest_price_url',
         'scorptec_price', 'scorptec_url', 'mwave_price', 'mwave_url',
         'pccasegear_price', 'pccasegear_url', 'jwcomputers_price', 'jwcomputers_url',
-        'umart_price', 'umart_url'
+        'umart_price', 'umart_url, digicor_price, digicor_url'
     ]
 
     with open(output_path, 'w', newline='', encoding='utf-8') as f:
@@ -260,7 +261,8 @@ def write_results_to_csv(results, output_path: str):
                 'Mwave': 'mwave',
                 'PC Case Gear': 'pccasegear',
                 'JW Computers': 'jwcomputers',
-                'Umart': 'umart'
+                'Umart': 'umart',
+                "Digicor": 'digicor'
             }
 
             for vendor_name, data in result_dict.items():
