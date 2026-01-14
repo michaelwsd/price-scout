@@ -35,12 +35,12 @@ import plotly.express as px
 
 # Vendor display names mapping
 vendor_names = {
+    "digicor": "Digicor",
     "scorptec": "Scorptec Computers",
     "mwave": "Mwave Australia",
     "pc_case_gear": "PC Case Gear",
     "jw_computers": "JW Computers",
-    "umart": "Umart",
-    "digicor": "Digicor"
+    "umart": "Umart"
 }
 
 

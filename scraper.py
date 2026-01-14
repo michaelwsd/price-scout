@@ -59,12 +59,12 @@ async def scrape_mpn_single(mpn):
     logger.info("Starting price scout for MPN=%s", mpn)
 
     scrapers = [
+        ("Digicor", DigicorScraper()),
         ("Scorptec", ScorptecScraper()),
         ("Mwave", MwaveScraper()),
         ("PC Case Gear", PCCaseGearScraper()),
         ("JW Computers", JWComputersScraper()),
-        ("Umart", UmartScraper()),
-        ("Digicor", DigicorScraper())
+        ("Umart", UmartScraper())
     ]
 
     tasks = [scraper.scrape(mpn) for _, scraper in scrapers]  # coroutine objects
