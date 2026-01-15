@@ -83,7 +83,7 @@ class UmartScraper(BaseScraper):
                 logger.warning(
                     "Product not found for MPN=%s on Umart page %s",
                     mpn,
-                    url,
+                    url
                 )
                 return self.not_found
 
@@ -92,7 +92,7 @@ class UmartScraper(BaseScraper):
                 logger.warning(
                     "Price not found for MPN=%s on Umart page %s",
                     mpn,
-                    url,
+                    url
                 )
                 return self.not_found
             else:

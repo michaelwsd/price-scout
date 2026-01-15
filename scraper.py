@@ -26,6 +26,7 @@ from scrapers.umart.umart_scraper import UmartScraper
 from scrapers.digicor_scraper import DigicorScraper
 from scrapers.centercom_scraper import CenterComScraper
 from scrapers.computeralliance_scraper import ComputerAllianceScraper
+from scrapers.cpl_scraper import CPLScraper
 
 from scrapers.umart.umart_scraper_playwright import UmartScraper as UmartPlaywrightScraper
 from scrapers.jwc.jw_computer_scraper_playwright import JWComputersScraper as JWCPlaywrightScraper
@@ -69,7 +70,8 @@ async def scrape_mpn_single(mpn, detailed=False):
         ("Digicor", DigicorScraper()),
         ("Mwave", MwaveScraper()),
         ("Center Com", CenterComScraper()),
-        ("Computer Alliance", ComputerAllianceScraper())
+        ("Computer Alliance", ComputerAllianceScraper()),
+        ("CPL", CPLScraper())
     ]
 
     if not detailed:
@@ -284,7 +286,8 @@ def write_results_to_csv(results, output_path: str):
                 'Umart': 'umart',
                 "Digicor": 'digicor',
                 "Center Com": 'centercom',
-                "Computer Alliance": 'computeralliance'
+                "Computer Alliance": 'computeralliance',
+                "CPL": 'cpl'
             }
 
             for vendor_name, data in result_dict.items():

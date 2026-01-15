@@ -42,7 +42,8 @@ vendor_names = {
     "jw_computers": "JW Computers",
     "umart": "Umart",
     "centercom": "Center Com",
-    "computeralliance": "Computer Alliance"
+    "computeralliance": "Computer Alliance",
+    "cpl": "CPL"
 }
 
 

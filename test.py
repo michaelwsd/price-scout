@@ -11,6 +11,7 @@ from scrapers.umart.umart_scraper_http import UmartScraper
 from scrapers.scorptec.scorptec_scraper_http import ScorptecScraper
 from scrapers.centercom_scraper import CenterComScraper
 from scrapers.computeralliance_scraper import ComputerAllianceScraper
+from scrapers.cpl_scraper import CPLScraper
 
 scraper = cloudscraper.create_scraper() # Returns a CloudScraper instance
 
@@ -242,8 +243,12 @@ def test_single_centercom(mpn):
     print(asyncio.run(centercomscraper.scrape(mpn)))
 
 def test_single_computeralliance(mpn):
-    cascraper = CenterComScraper()
+    cascraper = ComputerAllianceScraper()
     print(asyncio.run(cascraper.scrape(mpn)))
+
+def test_single_cpl(mpn):
+    cplscraper = CPLScraper()
+    print(asyncio.run(cplscraper.scrape(mpn)))
 
 if __name__ == "__main__":  
     mpns = ["BX8071512400", "SNV3S/2000G", "BX8071512100F", "100-100000910WOF", "100-100001015BOX", "BX80768285", "ST8000VN002"]
@@ -254,8 +259,12 @@ if __name__ == "__main__":
     print("="*50)
 
     # Computer Alliance
-    print("\n--- Computer Alliance ---")
-    test_single_computeralliance(mpn)
+    print("\n--- CPL ---")
+    test_single_cpl(mpn)
+
+    # # Computer Alliance
+    # print("\n--- Computer Alliance ---")
+    # test_single_computeralliance(mpn)
 
     # # Centercom
     # print("\n--- Center Com ---")

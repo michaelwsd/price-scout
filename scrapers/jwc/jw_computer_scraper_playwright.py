@@ -84,7 +84,7 @@ class JWComputersScraper(BaseScraper):
                 logger.warning(
                     "Product not found for MPN=%s on JW Computers page %s",
                     mpn,
-                    url,
+                    url
                 )
                 return self.not_found
 
@@ -93,7 +93,7 @@ class JWComputersScraper(BaseScraper):
                 logger.warning(
                     "Price not found for MPN=%s on JW Computers page %s",
                     mpn,
-                    url,
+                    url
                 )
                 return self.not_found
             else:

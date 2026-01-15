@@ -79,16 +79,25 @@ class ComputerAllianceScraper(BaseScraper):
                     return self.not_found
                 
                 product = data['d'][0]
-
-                # mpn check
-                mpn_match = product['Value'].split()[-1] == mpn
-                if not mpn_match:
-                    logger.warning(f"MPN not found on Computer Alliance page for {mpn}.")
-                    return self.not_found
-                
                 in_stock = "instock" in product['Stock'] 
                 price_text = product['Retail']
                 product_url = base_url + product['TitleURL']
+
+                # validate mpn
+                scraper = cloudscraper.create_scraper()
+                try:
+                    res = scraper.get(product_url, timeout=20)
+                    res.raise_for_status()
+                except Exception as e:
+                    logger.error("HTTP error fetching %s: %s", product_url, e)
+                    return self.not_found
+
+                soup = BeautifulSoup(res.text, "lxml")
+                mpn_div = soup.select_one("strong[id='MPN']").get_text().split()[-1]
+
+                if mpn_div != mpn:
+                    logger.warning(f"MPN not found on Center Com page for {mpn}.")
+                    return self.not_found
 
                 return PriceResult(
                     vendor_id=self.vendor_id,

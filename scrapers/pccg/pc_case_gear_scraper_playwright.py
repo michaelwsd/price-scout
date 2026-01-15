@@ -48,7 +48,7 @@ class PCCaseGearScraper(BaseScraper):
                 logger.warning(
                     "Product not found for MPN=%s on PC Case Gear page %s",
                     mpn,
-                    url,
+                    url
                 )
                 return self.not_found
             
@@ -58,7 +58,7 @@ class PCCaseGearScraper(BaseScraper):
                 logger.warning(
                     "Product not found for MPN=%s on PC Case Gear page %s",
                     mpn,
-                    url,
+                    url
                 )
                 return self.not_found
             
@@ -74,7 +74,7 @@ class PCCaseGearScraper(BaseScraper):
                 logger.warning(
                     "Product not found for MPN=%s on PC Case Gear page %s",
                     mpn,
-                    url,
+                    url
                 )
                 return self.not_found
 

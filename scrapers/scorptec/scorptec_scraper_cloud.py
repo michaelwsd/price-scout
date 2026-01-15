@@ -99,7 +99,7 @@ class ScorptecScraper(BaseScraper):
             logger.warning(
                 "Product not found for MPN=%s on Scorptec page %s",
                 mpn,
-                url,
+                url
             )
             return self.not_found
         
@@ -109,7 +109,7 @@ class ScorptecScraper(BaseScraper):
             logger.warning(
                 "Price not found for MPN=%s on Scorptec page %s",
                 mpn,
-                url,
+                url
             )
             return self.not_found 
 
