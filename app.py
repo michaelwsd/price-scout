@@ -41,7 +41,8 @@ vendor_names = {
     "pc_case_gear": "PC Case Gear",
     "jw_computers": "JW Computers",
     "umart": "Umart",
-    "centercom": "Center Com"
+    "centercom": "Center Com",
+    "computeralliance": "Computer Alliance"
 }
 
 

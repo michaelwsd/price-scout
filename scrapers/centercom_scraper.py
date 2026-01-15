@@ -30,10 +30,10 @@ class CenterComScraper(BaseScraper):
 
     async def scrape(self, mpn: str) -> PriceResult:
         """
-        Scrape price data using AJAX API and product page validation.
+        Scrape price data using API and product page validation.
 
         Performs a two-step validation:
-        1. Search via AJAX endpoint
+        1. Search via endpoint
         2. Verify exact MPN on product page
 
         Args:
@@ -47,21 +47,21 @@ class CenterComScraper(BaseScraper):
 
         logger.info("Scraping Center Com for MPN=%s", mpn)
 
-        headers = headers = {
-                        "accept": "application/json, text/plain, */*",
-                        "accept-encoding": "gzip, deflate, br, zstd",
-                        "accept-language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
-                        "origin": "https://www.centrecom.com.au",
-                        "priority": "u=1, i",
-                        "referer": "https://www.centrecom.com.au/",
-                        "sec-ch-ua": '"Microsoft Edge";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
-                        "sec-ch-ua-mobile": "?0",
-                        "sec-ch-ua-platform": '"Windows"',
-                        "sec-fetch-dest": "empty",
-                        "sec-fetch-mode": "cors",
-                        "sec-fetch-site": "same-site",
-                        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"
-                    }
+        headers = {
+                    "accept": "application/json, text/plain, */*",
+                    "accept-encoding": "gzip, deflate, br, zstd",
+                    "accept-language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
+                    "origin": "https://www.centrecom.com.au",
+                    "priority": "u=1, i",
+                    "referer": "https://www.centrecom.com.au/",
+                    "sec-ch-ua": '"Microsoft Edge";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
+                    "sec-ch-ua-mobile": "?0",
+                    "sec-ch-ua-platform": '"Windows"',
+                    "sec-fetch-dest": "empty",
+                    "sec-fetch-mode": "cors",
+                    "sec-fetch-site": "same-site",
+                    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0"
+                }
         
         try:
             async with AsyncSession() as s:

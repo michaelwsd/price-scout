@@ -24,7 +24,8 @@ from scrapers.pccg.pc_case_gear_scraper import PCCaseGearScraper
 from scrapers.jwc.jw_computer_scraper import JWComputersScraper
 from scrapers.umart.umart_scraper import UmartScraper
 from scrapers.digicor_scraper import DigicorScraper
-from scrapers.centercom import CenterComScraper
+from scrapers.centercom_scraper import CenterComScraper
+from scrapers.computeralliance_scraper import ComputerAllianceScraper
 
 from scrapers.umart.umart_scraper_playwright import UmartScraper as UmartPlaywrightScraper
 from scrapers.jwc.jw_computer_scraper_playwright import JWComputersScraper as JWCPlaywrightScraper
@@ -64,26 +65,27 @@ async def scrape_mpn_single(mpn, detailed=False):
 
     logger.info("Starting price scout for MPN=%s", mpn)
 
+    scrapers = [
+        ("Digicor", DigicorScraper()),
+        ("Mwave", MwaveScraper()),
+        ("Center Com", CenterComScraper()),
+        ("Computer Alliance", ComputerAllianceScraper())
+    ]
+
     if not detailed:
-        scrapers = [
-            ("Digicor", DigicorScraper()),
+        scrapers.extend([
             ("Scorptec", ScorptecScraper()),
-            ("Mwave", MwaveScraper()),
             ("PC Case Gear", PCCaseGearScraper()),
             ("JW Computers", JWComputersScraper()),
             ("Umart", UmartScraper()),
-            ("Center Com", CenterComScraper())
-        ]
+        ])
     else:
-        scrapers = [
-            ("Digicor", DigicorScraper()),
+        scrapers.extend([
             ("Scorptec", ScorptecCloudScraper()),
-            ("Mwave", MwaveScraper()),
             ("PC Case Gear", PCCaseGearPlaywrightScraper()),
             ("JW Computers", JWCPlaywrightScraper()),
             ("Umart", UmartPlaywrightScraper()),
-            ("Center Com", CenterComScraper())
-        ]
+        ])
 
     tasks = [scraper.scrape(mpn) for _, scraper in scrapers]  # coroutine objects
     results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -281,7 +283,8 @@ def write_results_to_csv(results, output_path: str):
                 'JW Computers': 'jwcomputers',
                 'Umart': 'umart',
                 "Digicor": 'digicor',
-                "Center Com": 'centercom'
+                "Center Com": 'centercom',
+                "Computer Alliance": 'computeralliance'
             }
 
             for vendor_name, data in result_dict.items():

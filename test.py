@@ -9,7 +9,8 @@ from scrapers.jwc.jw_computer_scraper_http import JWComputersScraper
 from scrapers.pccg.pc_case_gear_scraper_http import PCCaseGearScraper
 from scrapers.umart.umart_scraper_http import UmartScraper
 from scrapers.scorptec.scorptec_scraper_http import ScorptecScraper
-from scrapers.centercom import CenterComScraper
+from scrapers.centercom_scraper import CenterComScraper
+from scrapers.computeralliance_scraper import ComputerAllianceScraper
 
 scraper = cloudscraper.create_scraper() # Returns a CloudScraper instance
 
@@ -240,6 +241,10 @@ def test_single_centercom(mpn):
     centercomscraper = CenterComScraper()
     print(asyncio.run(centercomscraper.scrape(mpn)))
 
+def test_single_computeralliance(mpn):
+    cascraper = CenterComScraper()
+    print(asyncio.run(cascraper.scrape(mpn)))
+
 if __name__ == "__main__":  
     mpns = ["BX8071512400", "SNV3S/2000G", "BX8071512100F", "100-100000910WOF", "100-100001015BOX", "BX80768285", "ST8000VN002"]
     mpn = mpns[0]
@@ -248,9 +253,13 @@ if __name__ == "__main__":
     print(f"🔍 Price Scout Results for MPN: {mpn}")
     print("="*50)
 
-    # Centercom
-    print("\n--- Center Com ---")
-    test_single_centercom(mpn)
+    # Computer Alliance
+    print("\n--- Computer Alliance ---")
+    test_single_computeralliance(mpn)
+
+    # # Centercom
+    # print("\n--- Center Com ---")
+    # test_single_centercom(mpn)
 
     # # Digicor
     # print("\n--- Digicor ---")
