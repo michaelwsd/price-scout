@@ -9,6 +9,7 @@ from scrapers.jwc.jw_computer_scraper_http import JWComputersScraper
 from scrapers.pccg.pc_case_gear_scraper_http import PCCaseGearScraper
 from scrapers.umart.umart_scraper_http import UmartScraper
 from scrapers.scorptec.scorptec_scraper_http import ScorptecScraper
+from scrapers.centercom import CenterComScraper
 
 scraper = cloudscraper.create_scraper() # Returns a CloudScraper instance
 
@@ -235,6 +236,10 @@ async def test_single_umart(mpn):
 
         await browser.close()
 
+def test_single_centercom(mpn):
+    centercomscraper = CenterComScraper()
+    print(asyncio.run(centercomscraper.scrape(mpn)))
+
 if __name__ == "__main__":  
     mpns = ["BX8071512400", "SNV3S/2000G", "BX8071512100F", "100-100000910WOF", "100-100001015BOX", "BX80768285", "ST8000VN002"]
     mpn = mpns[0]
@@ -243,29 +248,33 @@ if __name__ == "__main__":
     print(f"🔍 Price Scout Results for MPN: {mpn}")
     print("="*50)
 
-    # Digicor
-    print("\n--- Digicor ---")
-    test_single_digicor(mpn) 
-      
-    # Scorptec
-    print("\n--- Scorptec ---")
-    test_single_scorptec(mpn)
-    
-    # Mwave
-    print("\n--- Mwave ---")
-    test_single_mwave(mpn)
-    
-    # PCCG (async)
-    print("\n--- PC Case Gear ---")
-    asyncio.run(test_single_pccg(mpn))
+    # Centercom
+    print("\n--- Center Com ---")
+    test_single_centercom(mpn)
 
-    # JW Computers
-    print("\n--- JW Computers ---")
-    asyncio.run(test_single_jwc(mpn))
+    # # Digicor
+    # print("\n--- Digicor ---")
+    # test_single_digicor(mpn) 
+      
+    # # Scorptec
+    # print("\n--- Scorptec ---")
+    # test_single_scorptec(mpn)
     
-    # Umart
-    print("\n--- Umart ---")
-    asyncio.run(test_single_umart(mpn))
+    # # Mwave
+    # print("\n--- Mwave ---")
+    # test_single_mwave(mpn)
+    
+    # # PCCG (async)
+    # print("\n--- PC Case Gear ---")
+    # asyncio.run(test_single_pccg(mpn))
+
+    # # JW Computers
+    # print("\n--- JW Computers ---")
+    # asyncio.run(test_single_jwc(mpn))
+    
+    # # Umart
+    # print("\n--- Umart ---")
+    # asyncio.run(test_single_umart(mpn))
 
     print("\n" + "="*50)
     print("✅ All scrapers completed")

@@ -24,6 +24,7 @@ from scrapers.pccg.pc_case_gear_scraper import PCCaseGearScraper
 from scrapers.jwc.jw_computer_scraper import JWComputersScraper
 from scrapers.umart.umart_scraper import UmartScraper
 from scrapers.digicor_scraper import DigicorScraper
+from scrapers.centercom import CenterComScraper
 
 from scrapers.umart.umart_scraper_playwright import UmartScraper as UmartPlaywrightScraper
 from scrapers.jwc.jw_computer_scraper_playwright import JWComputersScraper as JWCPlaywrightScraper
@@ -70,7 +71,8 @@ async def scrape_mpn_single(mpn, detailed=False):
             ("Mwave", MwaveScraper()),
             ("PC Case Gear", PCCaseGearScraper()),
             ("JW Computers", JWComputersScraper()),
-            ("Umart", UmartScraper())
+            ("Umart", UmartScraper()),
+            ("Center Com", CenterComScraper())
         ]
     else:
         scrapers = [
@@ -79,7 +81,8 @@ async def scrape_mpn_single(mpn, detailed=False):
             ("Mwave", MwaveScraper()),
             ("PC Case Gear", PCCaseGearPlaywrightScraper()),
             ("JW Computers", JWCPlaywrightScraper()),
-            ("Umart", UmartPlaywrightScraper())
+            ("Umart", UmartPlaywrightScraper()),
+            ("Center Com", CenterComScraper())
         ]
 
     tasks = [scraper.scrape(mpn) for _, scraper in scrapers]  # coroutine objects
@@ -277,7 +280,8 @@ def write_results_to_csv(results, output_path: str):
                 'PC Case Gear': 'pccasegear',
                 'JW Computers': 'jwcomputers',
                 'Umart': 'umart',
-                "Digicor": 'digicor'
+                "Digicor": 'digicor',
+                "Center Com": 'centercom'
             }
 
             for vendor_name, data in result_dict.items():

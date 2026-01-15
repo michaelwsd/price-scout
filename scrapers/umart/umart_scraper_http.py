@@ -9,7 +9,6 @@ Classes:
 """
 
 import logging
-import re
 from bs4 import BeautifulSoup
 from curl_cffi.requests import AsyncSession
 from models.models import PriceResult

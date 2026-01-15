@@ -40,7 +40,8 @@ vendor_names = {
     "mwave": "Mwave Australia",
     "pc_case_gear": "PC Case Gear",
     "jw_computers": "JW Computers",
-    "umart": "Umart"
+    "umart": "Umart",
+    "centercom": "Center Com"
 }
 
 
@@ -202,7 +203,7 @@ with tab_single:
                 "Vendor": vendor_names.get(res.vendor_id, res.vendor_id),
                 "Price": float(res.price) if res.price else None,
                 "Found": "✅" if res.found else "❌",
-                "In Stock": "✅" if res.in_stock else "❌",
+                "In Stock": ("✅" if res.in_stock else "❌") if res.found else None,
                 "Condition": res.condition if res.found else None,
                 "URL": str(res.url) if res.url else None
             } for res in results])

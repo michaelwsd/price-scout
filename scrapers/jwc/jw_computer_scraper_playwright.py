@@ -70,7 +70,7 @@ class JWComputersScraper(BaseScraper):
                 await page.goto(
                     link,
                     wait_until="networkidle",  # wait for JS requests
-                    timeout=30000              # 30 seconds
+                    timeout=60000              # 60 seconds
                 )
             except Exception as e:
                 logger.warning("Page failed to load for MPN=%s at %s: %s", mpn, url, e)
