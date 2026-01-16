@@ -53,7 +53,6 @@ class CenterComScraper(BaseScraper):
                     "accept-language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
                     "origin": "https://www.centrecom.com.au",
                     "priority": "u=1, i",
-                    "referer": "https://www.centrecom.com.au/",
                     "sec-ch-ua": '"Microsoft Edge";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
                     "sec-ch-ua-mobile": "?0",
                     "sec-ch-ua-platform": '"Windows"',
