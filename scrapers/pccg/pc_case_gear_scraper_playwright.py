@@ -1,5 +1,11 @@
 """
-Backup Scraper for PC Case Gear
+PC Case Gear Playwright Scraper.
+
+This module implements a browser-based web scraper for PC Case Gear using
+Playwright. Used as a fallback when the HTTP API scraper fails.
+
+Classes:
+    PCCaseGearScraper: Browser-based scraper for www.pccasegear.com
 """
 import logging
 from playwright.async_api import async_playwright
@@ -10,7 +16,26 @@ from models.base_scraper import BaseScraper
 
 logger = logging.getLogger(__name__)
 
+
 class PCCaseGearScraper(BaseScraper):
+    """
+    Web scraper for PC Case Gear using Playwright browser automation.
+
+    Renders JavaScript-heavy search pages using headless Chromium. Slower
+    than API scraping but handles dynamic content and complex page structures.
+    Includes stock status detection.
+
+    Attributes:
+        vendor_id: Identifier "pc_case_gear"
+        currency: "AUD" (Australian Dollar)
+        not_found: Default PriceResult for products not found
+
+    Example:
+        >>> scraper = PCCaseGearScraper()
+        >>> result = await scraper.scrape("BX8071512100F")
+        >>> print(f"In Stock: {result.in_stock}")
+    """
+
     vendor_id: str = "pc_case_gear"
     currency: str = "AUD" 
     not_found: PriceResult = PriceResult(

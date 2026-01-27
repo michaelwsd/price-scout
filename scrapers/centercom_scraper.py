@@ -17,6 +17,25 @@ logger = logging.getLogger(__name__)
 
 
 class CenterComScraper(BaseScraper):
+    """
+    Web scraper for Center Com (www.centrecom.com.au).
+
+    Uses Center Com's internal API for fast searches, with product page
+    validation to ensure exact MPN matches. Implements curl_cffi with
+    Chrome browser impersonation for reliable request handling.
+
+    Attributes:
+        vendor_id: Identifier "centercom"
+        currency: "AUD" (Australian Dollar)
+        not_found: Default PriceResult for products not found
+
+    Example:
+        >>> scraper = CenterComScraper()
+        >>> result = await scraper.scrape("BX8071512100F")
+        >>> if result.found:
+        ...     print(f"${result.price} - In Stock: {result.in_stock}")
+    """
+
     vendor_id: str = "centercom"
     currency: str = "AUD"
     not_found: PriceResult = PriceResult(

@@ -17,6 +17,25 @@ logger = logging.getLogger(__name__)
 
 
 class CPLScraper(BaseScraper):
+    """
+    Web scraper for CPL (www.cplonline.com.au).
+
+    Uses CPL's AJAX search suggestion API for fast searches, with product
+    page validation to ensure exact MPN matches. Checks top 2 results to
+    handle similar product names.
+
+    Attributes:
+        vendor_id: Identifier "cpl"
+        currency: "AUD" (Australian Dollar)
+        not_found: Default PriceResult for products not found
+
+    Example:
+        >>> scraper = CPLScraper()
+        >>> result = await scraper.scrape("BX8071512100F")
+        >>> if result.found:
+        ...     print(f"${result.price} - In Stock: {result.in_stock}")
+    """
+
     vendor_id: str = "cpl"
     currency: str = "AUD"
     not_found: PriceResult = PriceResult(

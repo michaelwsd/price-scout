@@ -17,6 +17,25 @@ logger = logging.getLogger(__name__)
 
 
 class ComputerAllianceScraper(BaseScraper):
+    """
+    Web scraper for Computer Alliance (www.computeralliance.com.au).
+
+    Uses Computer Alliance's AJAX API for fast searches, with product page
+    validation to ensure exact MPN matches. Implements curl_cffi with
+    Chrome browser impersonation for reliable request handling.
+
+    Attributes:
+        vendor_id: Identifier "computeralliance"
+        currency: "AUD" (Australian Dollar)
+        not_found: Default PriceResult for products not found
+
+    Example:
+        >>> scraper = ComputerAllianceScraper()
+        >>> result = await scraper.scrape("BX8071512100F")
+        >>> if result.found:
+        ...     print(f"${result.price} - In Stock: {result.in_stock}")
+    """
+
     vendor_id: str = "computeralliance"
     currency: str = "AUD"
     not_found: PriceResult = PriceResult(

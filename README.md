@@ -1,16 +1,20 @@
 # Price Scout
 
-**Price Scout** is a web scraping and price comparison tool for computer parts in Australia. Search for computer components by their Manufacturer Part Number (MPN) across five major Australian PC retailers and compare prices to find the best deals.
+**Price Scout** is a web scraping and price comparison tool for computer parts in Australia. Search for computer components by their Manufacturer Part Number (MPN) across nine major Australian PC retailers and compare prices to find the best deals.
 
 ## Features
 
 ### Core Functionality
-- **Multi-Vendor Price Scraping**: Compare prices across 5 major Australian retailers:
+- **Multi-Vendor Price Scraping**: Compare prices across 9 major Australian retailers:
   - Scorptec Computers
   - Mwave Australia
   - PC Case Gear
   - JW Computers
   - Umart
+  - Digicor
+  - Center Com
+  - Computer Alliance
+  - CPL
 
 - **Dual Interface**:
   - Modern web dashboard built with Streamlit
@@ -44,10 +48,12 @@
 
 ## Recent Updates
 
-- **Dual Scraper Implementations**: Added HTTP-based scrapers alongside browser-based versions for improved performance
-- **Fallback Logic**: Enhanced Scorptec scraper with robust fallback mechanisms
-- **Optimized Performance**: Reduced scraping time with lightweight HTTP implementations for CLI
+- **Expanded Vendor Support**: Added 4 new vendors (Digicor, Center Com, Computer Alliance, CPL) for comprehensive Australian market coverage
+- **Dual Scraper Implementations**: HTTP-based scrapers alongside browser-based versions for improved performance
+- **Fallback Logic**: Enhanced scrapers with robust fallback mechanisms (HTTP → Playwright/cloudscraper)
+- **API-Based Scraping**: Direct API access for Algolia-powered sites (PC Case Gear, JW Computers)
 - **Enhanced Documentation**: Comprehensive docstrings added across all modules
+- **curl_cffi Integration**: Browser impersonation for reliable API access
 - **Improved Reliability**: Better error handling and site variation support
 
 ## Technology Stack
@@ -76,18 +82,26 @@ price-scout/
 │
 ├── scrapers/                   # Vendor-specific scraper implementations
 │   ├── scorptec/              # Scorptec scraper modules
-│   │   ├── scorptec_scraper_fallback.py  # Fallback implementation
-│   │   └── scorptec_scraper_http.py      # HTTP implementation
+│   │   ├── scorptec_scraper.py           # Main fallback orchestrator
+│   │   ├── scorptec_scraper_http.py      # HTTP API implementation
+│   │   └── scorptec_scraper_cloud.py     # Cloudscraper implementation
 │   ├── mwave_scraper.py       # Mwave (cloudscraper)
+│   ├── digicor_scraper.py     # Digicor (cloudscraper)
+│   ├── centercom_scraper.py   # Center Com (curl_cffi + API)
+│   ├── computeralliance_scraper.py  # Computer Alliance (curl_cffi + API)
+│   ├── cpl_scraper.py         # CPL (curl_cffi + API)
 │   ├── pccg/                  # PC Case Gear scraper modules
-│   │   ├── pc_case_gear_scraper.py       # Browser-based implementation
-│   │   └── pc_case_gear_scraper_http.py  # HTTP implementation
+│   │   ├── pc_case_gear_scraper.py       # Main fallback orchestrator
+│   │   ├── pc_case_gear_scraper_http.py  # Algolia API implementation
+│   │   └── pc_case_gear_scraper_playwright.py  # Playwright implementation
 │   ├── jwc/                   # JW Computers scraper modules
-│   │   ├── jw_computer_scraper.py        # Browser-based implementation
-│   │   └── jw_computer_scraper_http.py   # HTTP implementation
+│   │   ├── jw_computer_scraper.py        # Main fallback orchestrator
+│   │   ├── jw_computer_scraper_http.py   # Algolia API implementation
+│   │   └── jw_computer_scraper_playwright.py   # Playwright implementation
 │   └── umart/                 # Umart scraper modules
-│       ├── umart_scraper.py              # Browser-based implementation
-│       └── umart_scraper_http.py         # HTTP implementation
+│       ├── umart_scraper.py              # Main fallback orchestrator
+│       ├── umart_scraper_http.py         # AJAX API implementation
+│       └── umart_scraper_playwright.py   # Playwright implementation
 │
 ├── models/                     # Data models and base classes
 │   ├── models.py              # PriceResult Pydantic model
@@ -171,7 +185,7 @@ BX8071512100F
 ### Scraping Architecture
 
 1. User inputs MPN via CLI or web dashboard
-2. Five scrapers execute concurrently using `asyncio.gather()`
+2. Nine scrapers execute concurrently using `asyncio.gather()`
 3. Each scraper:
    - Searches the vendor's website using the MPN
    - Extracts product details and price
@@ -182,17 +196,23 @@ BX8071512100F
 
 ### Scraper Types
 
-Each vendor scraper has been optimized with dual implementation strategies:
+Each vendor scraper uses optimized scraping strategies:
 
-- **HTTP Implementations**: Fast, lightweight HTTP requests with `cloudscraper` for Cloudflare bypass
-  - Used by: Scorptec, Mwave, PC Case Gear (HTTP), JW Computers (HTTP), Umart (HTTP)
+- **HTTP/API Implementations**: Fast, lightweight scraping using various techniques
+  - **cloudscraper**: Handles Cloudflare protection (Scorptec, Mwave, Digicor)
+  - **curl_cffi**: Browser impersonation for API access (Center Com, Computer Alliance, CPL)
+  - **Algolia API**: Direct search API queries (PC Case Gear, JW Computers)
   - Best for: CLI batch processing and quick queries
 
 - **Browser-Based Implementations**: Playwright headless browser for JavaScript-heavy sites
-  - Used by: PC Case Gear, JW Computers, Umart
+  - Used by: PC Case Gear, JW Computers, Umart (as fallbacks)
   - Best for: Sites with dynamic content loading
 
-- **Fallback Logic**: Scorptec includes fallback mechanisms to handle different site responses
+- **Fallback Logic**: Most vendors include fallback mechanisms:
+  - HTTP/API scrapers try first (faster)
+  - Playwright scrapers as fallback (more reliable for complex pages)
+  - Scorptec: HTTP → cloudscraper fallback
+  - PC Case Gear, JW Computers, Umart: HTTP → Playwright fallback
 
 ### Database Schema
 

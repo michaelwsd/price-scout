@@ -1,3 +1,12 @@
+"""
+Scorptec HTTP API Scraper.
+
+This module implements a fast web scraper for Scorptec using their search API.
+Extracts product data from JavaScript-embedded HTML templates without browser automation.
+
+Classes:
+    ScorptecScraper: API-based scraper for www.scorptec.com.au
+"""
 import logging
 import re
 from urllib.parse import urlparse, parse_qs, unquote
@@ -8,7 +17,26 @@ from models.base_scraper import BaseScraper
 
 logger = logging.getLogger(__name__)
 
+
 class ScorptecScraper(BaseScraper):
+    """
+    Web scraper for Scorptec (www.scorptec.com.au) using search API.
+
+    Queries Scorptec's search endpoint, extracts HTML from JavaScript response,
+    and parses product data. Faster than browser-based scraping.
+
+    Attributes:
+        vendor_id: Identifier "scorptec"
+        currency: "AUD" (Australian Dollar)
+        not_found: Default PriceResult for products not found
+
+    Example:
+        >>> scraper = ScorptecScraper()
+        >>> result = await scraper.scrape("BX8071512100F")
+        >>> if result.found:
+        ...     print(f"${result.price}")
+    """
+
     vendor_id: str = "scorptec"
     currency: str = "AUD"
     not_found: PriceResult = PriceResult(

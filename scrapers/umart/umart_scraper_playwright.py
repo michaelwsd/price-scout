@@ -1,5 +1,11 @@
 """
-Backup Scraper for Umart
+Umart Playwright Scraper.
+
+This module implements a browser-based web scraper for Umart using
+Playwright. Used as a fallback when the HTTP API scraper fails.
+
+Classes:
+    UmartScraper: Browser-based scraper for www.umart.com.au
 """
 import logging
 from playwright.async_api import async_playwright
@@ -10,7 +16,26 @@ from models.base_scraper import BaseScraper
 
 logger = logging.getLogger(__name__)
 
+
 class UmartScraper(BaseScraper):
+    """
+    Web scraper for Umart using Playwright browser automation.
+
+    Navigates search results and product pages using headless Chromium.
+    Validates MPN via itemprop='mpn' attribute on product pages.
+    Includes stock status detection.
+
+    Attributes:
+        vendor_id: Identifier "umart"
+        currency: "AUD" (Australian Dollar)
+        not_found: Default PriceResult for products not found
+
+    Example:
+        >>> scraper = UmartScraper()
+        >>> result = await scraper.scrape("BX8071512100F")
+        >>> print(f"In Stock: {result.in_stock}")
+    """
+
     vendor_id: str = "umart"
     currency: str = "AUD" 
     not_found: PriceResult = PriceResult(

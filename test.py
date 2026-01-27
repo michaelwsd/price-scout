@@ -262,37 +262,37 @@ if __name__ == "__main__":
     print("\n--- CPL ---")
     test_single_cpl(mpn)
 
-    # # Computer Alliance
-    # print("\n--- Computer Alliance ---")
-    # test_single_computeralliance(mpn)
+    # Computer Alliance
+    print("\n--- Computer Alliance ---")
+    test_single_computeralliance(mpn)
 
-    # # Centercom
-    # print("\n--- Center Com ---")
-    # test_single_centercom(mpn)
+    # Centercom
+    print("\n--- Center Com ---")
+    test_single_centercom(mpn)
 
-    # # Digicor
-    # print("\n--- Digicor ---")
-    # test_single_digicor(mpn) 
+    # Digicor
+    print("\n--- Digicor ---")
+    test_single_digicor(mpn) 
       
-    # # Scorptec
-    # print("\n--- Scorptec ---")
-    # test_single_scorptec(mpn)
+    # Scorptec
+    print("\n--- Scorptec ---")
+    test_single_scorptec(mpn)
     
-    # # Mwave
-    # print("\n--- Mwave ---")
-    # test_single_mwave(mpn)
+    # Mwave
+    print("\n--- Mwave ---")
+    test_single_mwave(mpn)
     
-    # # PCCG (async)
-    # print("\n--- PC Case Gear ---")
-    # asyncio.run(test_single_pccg(mpn))
+    # PCCG (async)
+    print("\n--- PC Case Gear ---")
+    asyncio.run(test_single_pccg(mpn))
 
-    # # JW Computers
-    # print("\n--- JW Computers ---")
-    # asyncio.run(test_single_jwc(mpn))
+    # JW Computers
+    print("\n--- JW Computers ---")
+    asyncio.run(test_single_jwc(mpn))
     
-    # # Umart
-    # print("\n--- Umart ---")
-    # asyncio.run(test_single_umart(mpn))
+    # Umart
+    print("\n--- Umart ---")
+    asyncio.run(test_single_umart(mpn))
 
     print("\n" + "="*50)
     print("✅ All scrapers completed")

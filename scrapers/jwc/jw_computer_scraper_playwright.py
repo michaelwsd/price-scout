@@ -1,5 +1,11 @@
 """
-Backup Scraper for JW Computers
+JW Computers Playwright Scraper.
+
+This module implements a browser-based web scraper for JW Computers using
+Playwright. Used as a fallback when the HTTP API scraper fails.
+
+Classes:
+    JWComputersScraper: Browser-based scraper for www.jw.com.au
 """
 import logging
 from playwright.async_api import async_playwright
@@ -10,7 +16,26 @@ from models.base_scraper import BaseScraper
 
 logger = logging.getLogger(__name__)
 
+
 class JWComputersScraper(BaseScraper):
+    """
+    Web scraper for JW Computers using Playwright browser automation.
+
+    Navigates search results and product pages using headless Chromium.
+    Validates MPN via itemprop='mpn' attribute on product pages.
+    Includes stock availability detection.
+
+    Attributes:
+        vendor_id: Identifier "jw_computers"
+        currency: "AUD" (Australian Dollar)
+        not_found: Default PriceResult for products not found
+
+    Example:
+        >>> scraper = JWComputersScraper()
+        >>> result = await scraper.scrape("BX8071512100F")
+        >>> print(f"Available: {result.in_stock}")
+    """
+
     vendor_id: str = "jw_computers"
     currency: str = "AUD" 
     not_found: PriceResult = PriceResult(

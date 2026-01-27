@@ -1,4 +1,27 @@
-# database.py
+"""
+Database Manager for Price Scout.
+
+This module provides SQLite database operations for storing and querying
+product price history. Supports smart price tracking that only creates new
+records when prices change, while updating timestamps for unchanged prices.
+
+Classes:
+    DatabaseManager: Main class for all database operations including
+        product management, price tracking, and analytics queries.
+
+Functions:
+    init_database: Factory function to create a DatabaseManager instance.
+
+Tables:
+    products: Stores unique product identifiers (MPN).
+    prices: Stores price records with vendor, price, and timestamp.
+
+Example:
+    >>> from db.db_manager import DatabaseManager
+    >>> db = DatabaseManager()
+    >>> db.add_price("BX8071512100F", "Scorptec", 245.00)
+    >>> history = db.get_price_history("BX8071512100F", "Scorptec")
+"""
 import sqlite3
 import logging
 from datetime import datetime
@@ -17,10 +40,29 @@ print(DB_PATH)
 
 
 class DatabaseManager:
-    """Manager class for SQLite database operations"""
+    """
+    SQLite database manager for price tracking and analytics.
+
+    Provides CRUD operations for products and prices, with intelligent
+    price tracking that avoids duplicate records when prices remain unchanged.
+
+    Attributes:
+        db_path: Path to the SQLite database file.
+
+    Example:
+        >>> db = DatabaseManager()
+        >>> db.add_price("BX8071512100F", "Scorptec", 245.00)
+        >>> trends = db.get_price_trends_by_mpn("BX8071512100F")
+    """
 
     def __init__(self, db_path: str = None):
-        """Initialize database manager with optional custom path"""
+        """
+        Initialize database manager with optional custom path.
+
+        Args:
+            db_path: Optional path to SQLite database file.
+                     Defaults to app.db in project root.
+        """
         self.db_path = db_path or str(DB_PATH)
         self._create_tables()
 
